@@ -4,10 +4,12 @@ import com.gamehub.product.exceptions.ProductException;
 import com.gamehub.product.models.Product;
 import com.gamehub.product.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Service
 public class ProductServiceImpl implements ProductService{
 
     @Autowired
@@ -54,6 +56,13 @@ public class ProductServiceImpl implements ProductService{
     @Transactional
     @Override
     public Product updateById(Long id, Product product) {
-        return null;
+        return this.productRepository.findById(id).map(element -> {
+            element.setEstado(product.getEstado());
+            element.setPrecio(product.getPrecio());
+            element.setDescripcion(product.getDescripcion());
+            return this.productRepository.save(element);
+        }).orElseThrow(
+                () -> new ProductException("El producto con Id " + id + " no existe.")
+        );
     }
 }
