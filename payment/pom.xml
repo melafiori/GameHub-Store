@@ -3,13 +3,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.6</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<groupId>com.duoc</groupId>
+		<artifactId>GameHubStore</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<groupId>com.duoc</groupId>
-	<artifactId>GameHubStore</artifactId>
+	<groupId>com.gamehub</groupId>
+	<artifactId>payment</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name/>
 	<description/>
@@ -30,21 +29,6 @@
 		<java.version>21</java.version>
 		<spring-cloud.version>2025.1.1</spring-cloud.version>
 	</properties>
-
-	<packaging>pom</packaging>
-	<modules>
-		<module>auth</module>
-		<module>category</module>
-		<module>inventory</module>
-		<module>order</module>
-		<module>payment</module>
-		<module>product</module>
-		<module>promotion</module>
-		<module>review</module>
-		<module>shipping</module>
-		<module>user</module>
-	</modules>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
