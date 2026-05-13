@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long userId;
 
     @Column(name = "user_nombre", nullable = false)
     @NotBlank(message = "El campo nombre del usuario no puede estar vacío.")
