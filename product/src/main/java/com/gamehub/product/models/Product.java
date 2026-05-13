@@ -20,6 +20,10 @@ public class Product {
     @Column(name = "product_id")
     private Long productId;
 
+    @Column(name = "product_sku", nullable = false)
+    @NotBlank(message = "El campo SKU no puede estar vacío.")
+    private String sku;
+
 
     @Column(name = "product_nombre", nullable = false)
     @NotBlank(message = "El campo nombre del producto no puede ser vacío.")
