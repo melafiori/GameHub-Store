@@ -1,4 +1,4 @@
-package models.dtos;
+package com.gamehub.user.models.dtos;
 
 import java.time.LocalDateTime;
 

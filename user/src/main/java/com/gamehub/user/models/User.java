@@ -1,4 +1,4 @@
-package models;
+package com.gamehub.user.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -36,4 +36,7 @@ public class User {
     @Column(name = "user_estado", nullable = false)
     @NotBlank(message = "El campo estado del usuario no puede estar vacío.")
     private String estado;
+
+    @Embedded
+    private Audit audit = new Audit();
 }
