@@ -30,6 +30,14 @@
 		<java.version>21</java.version>
 		<spring-cloud.version>2025.1.1</spring-cloud.version>
 	</properties>
+
+	<packaging>pom</packaging>
+	<modules>
+		<module>review</module>
+		<module>category</module>
+		<module>product</module>
+	</modules>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
