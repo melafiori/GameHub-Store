@@ -1,11 +1,19 @@
 package com.gamehub.user.models.dtos;
 
-import java.time.LocalDateTime;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 
+@Data
 public class UserDTO {
 
-    private Long userId;
-    private LocalDateTime
+    @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
+
+    @Email(message = "Correo inválido")
     private String email;
+
+    private String telefono;
+
+    private String rol;
 }

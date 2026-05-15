@@ -8,10 +8,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 @Entity
 @Data
+@Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class User {
+public class User extends Audit{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -21,7 +22,7 @@ public class User {
     private String nombre;
 
     @Email
-    @Column(name = "user_email", nullable = false)
+    @Column(unique = true)
     @NotBlank(message = "El campo email del usuario no puede estar vacío.")
     private String email;
 
