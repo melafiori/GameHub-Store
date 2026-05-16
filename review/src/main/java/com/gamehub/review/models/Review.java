@@ -1,6 +1,8 @@
 package com.gamehub.review.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,19 +10,31 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 @Entity
+@Table(name = "reviews")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class Review {
+public class Review extends Audit{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "review_id")
     private Long resenaId;
 
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
+
+    @Column(name = "orden_id", nullable = false)
+    private Long ordenId;
+
     @Column(name = "review_puntuacion", nullable = false)
-    @NotBlank(message = "El campo puntuacion de review no puede estar vacío.")
-    private double puntuacion;
+    @Min(value = 1, message = "La puntuación mínima es 1")
+    @Max(value = 5, message = "La puntuación máxima es 5")
+    private Integer puntuacion;
 
     @Column(name = "review_comentario")
     private String comentario;
@@ -29,13 +43,7 @@ public class Review {
     @NotBlank(message = "El campo estado de review no puede estar vacío.")
     private String estado;
 
-    @Column(name = "review_fecha", nullable = false)
-    @NotBlank(message = "El campo fecha de review no puede estar vacío.")
-    private LocalDateTime fecha;
-
     @Embedded
     private Audit audit = new Audit();
-
-    //Hay que hacer como column userId, productoId, ordenId
 
 }
