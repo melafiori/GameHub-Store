@@ -2,14 +2,12 @@ package com.gamehub.auth.controllers;
 
 import com.gamehub.auth.models.Auth;
 import com.gamehub.auth.services.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -34,4 +32,25 @@ public class AuthController {
                 .status(HttpStatus.OK)
                 .body(this.authService.findById(id));
     }
+
+    @PostMapping
+    public ResponseEntity<Auth> save(@Valid @RequestBody Auth auth) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(this.authService.save(auth));
+    }
+
+    @PutMapping("/{id}")
+    public  ResponseEntity<Auth> update(@PathVariable Long id, @Valid @RequestBody Auth auth) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(this.authService.updateById(id, auth));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        this.authService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

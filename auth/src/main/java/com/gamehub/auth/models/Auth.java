@@ -22,19 +22,20 @@ public class Auth {
     @Column(name = "auth_id", nullable = false)
     private Long authId;
 
-    @Column(name = "auth_email", nullable = false)
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "auth_hash_pswd", nullable = false)
+    @Column(name = "hash_pswd", nullable = false)
     private String passwordHash;
 
-    @Column(name = "auth_rol", nullable = false)
+    @Column(name = "rol", nullable = false)
     private String rol;
 
-    @Column(name = "auth_estado", nullable = false)
+    @Column(name = "estado", nullable = false)
     private String estado;
 
-    // fechaCreación x audit o como variable local?
+    @Column(name = "fecha_creacion", nullable = false)
+    private LocalDateTime fechaCreacion;
 
     @Embedded
     private Audit audit = new Audit();
