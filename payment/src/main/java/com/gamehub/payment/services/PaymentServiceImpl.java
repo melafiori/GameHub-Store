@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -26,6 +27,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         pago.setEstado("PENDIENTE");
+        pago.setFecha(LocalDateTime.now());
         return paymentRepository.save(pago);
     }
 

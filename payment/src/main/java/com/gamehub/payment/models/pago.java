@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "pagos")
 @Data
@@ -33,4 +35,7 @@ public class Pago extends Audit{
 
     @Column(name = "codigo_transaccion", unique = true)
     private String codigoTransaccion;
+
+    @Column(name = "fecha", unique = true)
+    private LocalDateTime fecha;
 }
