@@ -2,6 +2,7 @@ package com.gamehub.user.services;
 
 import com.gamehub.user.exceptions.UserException;
 import com.gamehub.user.models.User;
+import com.gamehub.user.repositories.DireccionRepository;
 import jdk.jshell.spi.ExecutionControl;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -18,6 +19,8 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private final UserRepository userRepository;
+    private final DireccionRepository direccionRepository;
+
 
     @Transactional(readOnly = true)
     @Override
@@ -29,11 +32,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User save(User user) {
-
         if (this.userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new UserException("Usuario ya se encuentra registrado");
+            throw new UserException("Correo ya se encuentra registrado");
         }
         user.setEstado("ACTIVO");
+        User savedUser = userRepository.save(user);
+
         return this.userRepository.save(user);
     }
 
