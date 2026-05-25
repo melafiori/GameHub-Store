@@ -7,6 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class Order extends Audit{
 
@@ -29,4 +31,7 @@ public class Order extends Audit{
 
     @Column(name = "total", nullable = false)
     private Double total;
+
+    @Column(name= "fecha", nullable = false)
+    private LocalDateTime fecha;
 }

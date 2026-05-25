@@ -7,13 +7,14 @@ import jakarta.transaction.Transactional;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
 
 import java.util.List;
 
 @Data
 @Service
 @RequiredArgsConstructor
-public class OrderServicelmpl implements OrderService{
+public class OrderServiceImpl implements OrderService{
     private final OrderRepository orderRepository;
 
     @Transactional
@@ -21,6 +22,7 @@ public class OrderServicelmpl implements OrderService{
     public Order save(Order order) {
 
         order.setEstado("PENDIENTE");
+        order.setFecha(LocalDateTime.now());
 
         return orderRepository.save(order);
     }
