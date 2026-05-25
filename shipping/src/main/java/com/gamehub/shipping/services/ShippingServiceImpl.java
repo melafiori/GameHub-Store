@@ -12,7 +12,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ShippingServicelmpl implements ShippingService{
+public class ShippingServiceImpl implements ShippingService{
     private final ShippingRepository shippingRepository;
 
     @Transactional

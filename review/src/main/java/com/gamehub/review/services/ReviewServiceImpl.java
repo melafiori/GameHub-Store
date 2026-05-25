@@ -6,6 +6,7 @@ import com.gamehub.review.repositories.ReviewRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
 
 import java.util.List;
 
@@ -29,9 +30,8 @@ public class ReviewServiceImpl implements ReviewService{
                     "Ya existe una reseña para esta compra"
             );
         }
-
         review.setEstado("ACTIVA");
-
+        review.setFecha(LocalDateTime.now());
         return reviewRepository.save(review);
     }
 

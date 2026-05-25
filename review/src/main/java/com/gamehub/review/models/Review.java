@@ -43,6 +43,9 @@ public class Review extends Audit{
     @NotBlank(message = "El campo estado de review no puede estar vacío.")
     private String estado;
 
+    @Column(name = "review_fecha", nullable = false)
+    private LocalDateTime fecha;
+
     @Embedded
     private Audit audit = new Audit();
 
