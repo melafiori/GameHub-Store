@@ -10,7 +10,7 @@ public interface PaymentService {
     Pago save(Pago pago);
     Pago updateById(Long id, Pago pago);
     void deleteById(Long id);
-    List<Pago> findByOrdenId(Long ordenId);
+    List<Pago> findByOrderId(Long orderId);
     List<Pago> findByUserId(Long userId);
     List<Pago> findByEstado(String estado);
 }

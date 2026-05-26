@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Pago extends Audit{
+public class Pago{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pago_id", nullable = false)
@@ -33,9 +33,12 @@ public class Pago extends Audit{
     @Column(name = "estado",nullable = false)
     private String estado;
 
-    @Column(name = "codigo_transaccion", unique = true)
-    private String codigoTransaccion;
+    @Column(name = "codigo_transaction", unique = true)
+    private String codigoTransaction;
 
     @Column(name = "fecha", unique = true)
     private LocalDateTime fecha;
+
+    @Embedded
+    private Audit audit = new Audit();
 }

@@ -18,11 +18,11 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     @Override
     public Pago save(Pago pago) {
-        boolean pagoExistente = paymentRepository.existsByOrdenIdAndEstado(pago.getOrdenId(), "APROBADO");
+        boolean pagoExistente = paymentRepository.existsByOrderIdAndEstado(pago.getOrdenId(), "APROBADO");
         if (pagoExistente) {
                 throw new PaymentException("La orden ya tiene un pago aprobado.");
         }
-        if(pago.getCodigoTransaccion() != null && paymentRepository.findByCodigoTransaccion(pago.getCodigoTransaccion()).isPresent()) {
+        if(pago.getCodigoTransaction() != null && paymentRepository.findByCodigoTransaction(pago.getCodigoTransaction()).isPresent()) {
             throw new PaymentException("Código de transacción duplicado.");
         }
 
@@ -36,13 +36,13 @@ public class PaymentServiceImpl implements PaymentService {
     public Pago updateById(Long id, Pago pago) {
         Pago currentPago = this.findById(id);
         currentPago.setEstado(pago.getEstado());
-        if(pago.getCodigoTransaccion() != null && !pago.getCodigoTransaccion().equals(currentPago.getCodigoTransaccion())) {
-            if(paymentRepository.findByCodigoTransaccion(pago.getCodigoTransaccion()).isPresent()) {
+        if(pago.getCodigoTransaction() != null && !pago.getCodigoTransaction().equals(currentPago.getCodigoTransaction())) {
+            if(paymentRepository.findByCodigoTransaction(pago.getCodigoTransaction()).isPresent()) {
 
                 throw new PaymentException("Código de transacción duplicado.");
             }
 
-            currentPago.setCodigoTransaccion(pago.getCodigoTransaccion());
+            currentPago.setCodigoTransaction(pago.getCodigoTransaction());
         }
         return paymentRepository.save(currentPago);
     }
@@ -69,8 +69,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Transactional
     @Override
-    public List<Pago> findByOrdenId(Long ordenId) {
-        return paymentRepository.findByOrdenId(ordenId);
+    public List<Pago> findByOrderId(Long ordenId) {
+        return paymentRepository.findByOrderId(ordenId);
     }
 
     @Transactional

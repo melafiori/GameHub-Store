@@ -1,7 +1,6 @@
 package com.gamehub.payment.controllers;
 
 import com.gamehub.payment.models.Pago;
-import com.gamehub.payment.repositories.PaymentRepository;
 import com.gamehub.payment.services.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +18,7 @@ public class PaymentController {
         return paymentService.findAll();
     }
 
-    @GetMapping("/id")
+    @GetMapping("/{id}")
     public Pago findById(@PathVariable Long id) {
         return paymentService.findById(id);
     }
@@ -39,14 +38,14 @@ public class PaymentController {
         paymentService.deleteById(id);
     }
 
-    @GetMapping("/orden/{ordenId}")
-    public List<Pago> findByOrden(@PathVariable Long ordenId) {
-        return paymentService.findByOrdenId(ordenId);
+    @GetMapping("/order/{orderId}")
+    public List<Pago> findByOrder(@PathVariable Long orderId) {
+        return paymentService.findByOrderId(orderId);
     }
 
-    @GetMapping("/usuario/{usuarioId}")
-    public List<Pago> findByUsuario(@PathVariable Long usuarioId) {
-        return paymentService.findByUserId(usuarioId);
+    @GetMapping("/user/{userId}")
+    public List<Pago> findByUser(@PathVariable Long userId) {
+        return paymentService.findByUserId(userId);
     }
 
     @GetMapping("/estado/{estado}")

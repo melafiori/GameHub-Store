@@ -1,17 +1,18 @@
 package com.gamehub.payment.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
-@MappedSuperclass
+@Embeddable
 @Getter
 @Setter
+@NoArgsConstructor
+@ToString
 public class Audit {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
