@@ -4,15 +4,11 @@ import com.gamehub.user.exceptions.UserException;
 import com.gamehub.user.models.Direccion;
 import com.gamehub.user.models.User;
 import com.gamehub.user.repositories.DireccionRepository;
-import jdk.jshell.spi.ExecutionControl;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.gamehub.user.repositories.UserRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
