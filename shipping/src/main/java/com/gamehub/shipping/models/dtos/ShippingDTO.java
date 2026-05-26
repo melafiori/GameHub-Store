@@ -8,4 +8,6 @@ public class ShippingDTO {
     private Long userId;
     private String direccion;
     private String transportista;
+    private String tracking;
+    private String estado;
 }

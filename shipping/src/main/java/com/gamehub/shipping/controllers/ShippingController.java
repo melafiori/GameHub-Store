@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/shipping")
+@RequestMapping("/shippings")
 @RequiredArgsConstructor
 public class ShippingController {
     private final ShippingService shippingService;
@@ -25,8 +25,7 @@ public class ShippingController {
     }
 
     @PostMapping
-    public Shipping save(
-            @Valid @RequestBody Shipping shipping) {
+    public Shipping save(@Valid @RequestBody Shipping shipping) {
         return shippingService.save(shipping);
     }
 
@@ -43,14 +42,12 @@ public class ShippingController {
     }
 
     @GetMapping("/order/{orderId}")
-    public List<Shipping> findByOrdenId(
-            @PathVariable Long orderId) {
+    public List<Shipping> findByOrderId(@PathVariable Long orderId) {
         return shippingService.findByOrderId(orderId);
     }
 
     @GetMapping("/estado/{estado}")
-    public List<Shipping> findByEstado(
-            @PathVariable String estado) {
+    public List<Shipping> findByEstado(@PathVariable String estado) {
         return shippingService.findByEstado(estado);
     }
 }

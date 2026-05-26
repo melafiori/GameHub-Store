@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "despachos")
+@Table(name = "shippings")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,8 +16,8 @@ public class Shipping extends Audit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
-    @Column(name = "despacho_id")
-    private Long despachoId;
+    @Column(name = "shipping_id")
+    private Long shippingId;
 
     @Column(name = "order_id", nullable = false)
     private Long orderId;
@@ -40,6 +40,6 @@ public class Shipping extends Audit {
     @Column(name = "fecha_envio",nullable = false)
     private LocalDateTime fechaEnvio;
 
-    @Column(name = "fecha_entrega",nullable = false)
-    private LocalDateTime fechaEntrega;
+    @Embedded
+    private Audit audit = new Audit();
 }

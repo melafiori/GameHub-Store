@@ -19,15 +19,11 @@ public class ShippingServiceImpl implements ShippingService{
     @Override
     public Shipping save(Shipping shipping) {
 
-        if(shipping.getTracking() != null &&
-                shippingRepository.findByTracking(
-                        shipping.getTracking()).isPresent()) {
-
+        if(shipping.getTracking() != null && shippingRepository.findByTracking(shipping.getTracking()).isPresent()) {
             throw new ShippingException(
                     "El tracking ya existe");
         }
-
-        shipping.setEstado("PREPARANDO");
+        shipping.setEstado("PENDIENTE");
         shipping.setFechaEnvio(LocalDateTime.now());
 
         return shippingRepository.save(shipping);
@@ -47,19 +43,11 @@ public class ShippingServiceImpl implements ShippingService{
                     shipping.getTracking()).isPresent()) {
                 throw new ShippingException("El tracking ya existe");
             }
-
             currentShipping.setTracking(
                     shipping.getTracking());
         }
-
-        if(shipping.getEstado().equals("ENTREGADO") && shipping.getFechaEntrega() == null) {
-            throw new ShippingException("No se puede entregar sin fecha de entrega");
-        }
-
         currentShipping.setEstado(shipping.getEstado());
-        currentShipping.setFechaEntrega(
-                shipping.getFechaEntrega());
-
+        currentShipping.setTransportista(shipping.getTransportista());
         return shippingRepository.save(currentShipping);
     }
 
