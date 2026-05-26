@@ -1,16 +1,13 @@
 package com.gamehub.order.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
-public class Order extends Audit{
+public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,4 +31,10 @@ public class Order extends Audit{
 
     @Column(name= "fecha", nullable = false)
     private LocalDateTime fecha;
+
+    @Transient
+    private List<DetalleOrder> detalles;
+
+    @Embedded
+    private Audit audit = new Audit();
 }

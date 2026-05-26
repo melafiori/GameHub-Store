@@ -1,30 +1,37 @@
 package com.gamehub.order.services;
 
 import com.gamehub.order.exceptions.OrderException;
+import com.gamehub.order.models.DetalleOrder;
 import com.gamehub.order.models.Order;
+import com.gamehub.order.repositories.DetalleOrderRepository;
 import com.gamehub.order.repositories.OrderRepository;
 import jakarta.transaction.Transactional;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 import java.util.List;
 
-@Data
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService{
     private final OrderRepository orderRepository;
+    private final DetalleOrderRepository detalleOrderRepository;
 
     @Transactional
     @Override
     public Order save(Order order) {
-
         order.setEstado("PENDIENTE");
         order.setFecha(LocalDateTime.now());
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        if(order.getDetalles()!=null){
+            for(DetalleOrder detalle :order.getDetalles()){
+                detalle.setOrderId(savedOrder.getOrderId());
+                detalleOrderRepository.save(detalle);
+            }
+        }
+        return savedOrder;
     }
 
     @Transactional
@@ -63,8 +70,11 @@ public class OrderServiceImpl implements OrderService{
     @Transactional
     @Override
     public Order findById(Long id) {
-        return orderRepository.findById(id).orElseThrow(
+        Order order =  orderRepository.findById(id).orElseThrow(
                 () -> new OrderException("Orden no encontrada"));
+
+        order.setDetalles(detalleOrderRepository.findByOrderId(order.getOrderId()));
+        return order;
     }
 
     @Transactional

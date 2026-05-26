@@ -1,7 +1,6 @@
 package com.gamehub.order.controllers;
 
 import com.gamehub.order.models.Order;
-import com.gamehub.order.repositories.OrderRepository;
 import com.gamehub.order.services.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +30,7 @@ public class OrderController {
     }
 
     @PutMapping("/{id}")
-    public Order updateById(
-            @PathVariable Long id,
-            @RequestBody Order order) {
+    public Order updateById(@PathVariable Long id,@RequestBody Order order) {
         return orderService.updateById(id, order);
     }
 
@@ -43,15 +40,12 @@ public class OrderController {
     }
 
     @GetMapping("/user/{userId}")
-    public List<Order> findByUserId(
-            @PathVariable Long userId) {
-
+    public List<Order> findByUserId(@PathVariable Long userId) {
         return orderService.findByUserId(userId);
     }
 
     @GetMapping("/estado/{estado}")
-    public List<Order> findByEstado(
-            @PathVariable String estado) {
+    public List<Order> findByEstado(@PathVariable String estado) {
         return orderService.findByEstado(estado);
     }
 }
