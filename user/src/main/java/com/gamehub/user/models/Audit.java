@@ -7,7 +7,6 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 
-// No es necesario el superclass, para eso se usa el embeddable
 @Embeddable
 @Getter
 @Setter

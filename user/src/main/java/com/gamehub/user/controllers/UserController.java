@@ -17,39 +17,35 @@ public class UserController {
 
     @GetMapping
     public List<User> findAll() {
-        return this.userService.findAll();
+        return userService.findAll();
     }
 
     @GetMapping("/{id}")
     public User findById(@PathVariable Long id) {
-        return this.userService.findById(id);
+        return userService.findById(id);
     }
 
     @PostMapping
     public User save(@Valid @RequestBody User user) {
-        return this.userService.save(user);
+        return userService.save(user);
     }
 
     @PutMapping("/{id}")
-    public User updateById(
-            @PathVariable Long id,
-            @RequestBody User user) {
-
-        return this.userService.updateById(id, user);
+    public User updateById(@PathVariable Long id, @RequestBody User user) {
+        return userService.updateById(id, user);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable Long id) {
-        this.userService.deleteById(id);
+    public void deleteById(@PathVariable Long id) { userService.deleteById(id);
     }
 
     @GetMapping("/rol/{rol}")
     public List<User> findByRol(@PathVariable String rol) {
-        return this.userService.findByRol(rol);
+        return userService.findByRol(rol);
     }
 
     @GetMapping("/estado/{estado}")
     public List<User> findByEstado(@PathVariable String estado) {
-        return this.userService.findByEstado(estado);
+        return userService.findByEstado(estado);
     }
 }

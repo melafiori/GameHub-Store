@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
+
 @Entity
 @Data
 @Table(name = "users")
@@ -37,6 +40,9 @@ public class User{
     @Column(name = "user_estado", nullable = false)
     @NotBlank(message = "El campo estado del usuario no puede estar vacío.")
     private String estado;
+
+    @Transient
+    private List<Direccion> direcciones;
 
     @Embedded
     private Audit audit = new Audit();
