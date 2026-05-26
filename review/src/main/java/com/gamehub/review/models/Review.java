@@ -29,7 +29,7 @@ public class Review extends Audit{
     private Long productId;
 
     @Column(name = "orden_id", nullable = false)
-    private Long ordenId;
+    private Long orderId;
 
     @Column(name = "review_puntuacion", nullable = false)
     @Min(value = 1, message = "La puntuación mínima es 1")

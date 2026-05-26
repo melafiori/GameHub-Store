@@ -18,20 +18,15 @@ public class ReviewServiceImpl implements ReviewService{
     @Transactional
     @Override
     public Review save(Review review) {
-
-        boolean existe = reviewRepository.existsByUserIdAndProductIdAndOrdenId(
+        if(reviewRepository.existsByUserIdAndProductIdAndOrderId(
                         review.getUserId(),
                         review.getProductId(),
-                        review.getOrdenId()
-                );
-
-        if(existe){
-            throw new ReviewException(
-                    "Ya existe una reseña para esta compra"
-            );
+                        review.getOrderId())) {
+            throw new ReviewException("Ya existe una reseña para esta compra");
         }
         review.setEstado("ACTIVA");
         review.setFecha(LocalDateTime.now());
+
         return reviewRepository.save(review);
     }
 
@@ -52,7 +47,7 @@ public class ReviewServiceImpl implements ReviewService{
     public void deleteById(Long id) {
 
         Review review = this.findById(id);
-        review.setEstado("MODERADA");
+        review.setEstado("ELIMINADA");
 
         reviewRepository.save(review);
     }

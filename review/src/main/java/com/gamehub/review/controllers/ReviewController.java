@@ -12,7 +12,6 @@ import java.util.List;
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
-
     private final ReviewService reviewService;
 
     @GetMapping
@@ -31,10 +30,7 @@ public class ReviewController {
     }
 
     @PutMapping("/{id}")
-    public Review updateById(
-            @PathVariable Long id,
-            @RequestBody Review review) {
-
+    public Review updateById(@PathVariable Long id, @RequestBody Review review) {
         return reviewService.updateById(id, review);
     }
 
@@ -43,17 +39,13 @@ public class ReviewController {
         reviewService.deleteById(id);
     }
 
-    @GetMapping("/producto/{productoId}")
-    public List<Review> findByProductId(
-            @PathVariable Long productId) {
-
+    @GetMapping("/product/{productId}")
+    public List<Review> findByProductId(@PathVariable Long productId) {
         return reviewService.findByProductId(productId);
     }
 
     @GetMapping("/user/{userId}")
-    public List<Review> findByUserId(
-            @PathVariable Long userId) {
-
+    public List<Review> findByUserId(@PathVariable Long userId) {
         return reviewService.findByUserId(userId);
     }
 }

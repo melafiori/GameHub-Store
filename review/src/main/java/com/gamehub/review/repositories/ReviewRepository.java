@@ -8,10 +8,5 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByProductId(Long productId);
     List<Review> findByUserId(Long userId);
-
-    boolean existsByUserIdAndProductIdAndOrdenId(
-            Long userId,
-            Long productId,
-            Long ordenId
-    );
+    boolean existsByUserIdAndProductIdAndOrderId(Long userId, Long productId, Long orderId);
 }
