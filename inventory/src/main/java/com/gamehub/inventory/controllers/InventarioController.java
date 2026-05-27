@@ -1,6 +1,7 @@
 package com.gamehub.inventory.controllers;
 
 import com.gamehub.inventory.models.Inventario;
+import com.gamehub.inventory.models.dtos.InventarioResponseDto;
 import com.gamehub.inventory.repositories.InventarioRepository;
 import com.gamehub.inventory.services.InventarioService;
 import feign.Response;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/inventario")
+@RequestMapping("/api/v1/inventory")
 @Validated
 public class InventarioController {
 
@@ -22,10 +23,8 @@ public class InventarioController {
     private InventarioService inventarioService;
 
     @GetMapping
-    public ResponseEntity<List<Inventario>> getAll() {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(this.inventarioService.getAll());
+    public ResponseEntity<List<InventarioResponseDto>> getAll() {
+        return ResponseEntity.ok(this.inventarioService.findAll());
     }
 
     @GetMapping("/{id}")

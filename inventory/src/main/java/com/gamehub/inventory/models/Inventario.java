@@ -20,8 +20,8 @@ public class Inventario {
     @Column(name = "inventory_id", nullable = false)
     private Long inventoryId;
 
-    @Column(name = "producto_id", nullable = false)
-    private Long productoId;
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
 
     @Column(name = "stock_disponible", nullable = false)
     private int stockDisponible;
