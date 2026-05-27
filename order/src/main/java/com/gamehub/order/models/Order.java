@@ -2,38 +2,31 @@ package com.gamehub.order.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Entity
+@Table(name = "order_items")
+@Getter @Setter
+@NoArgsConstructor
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_id")
-    private Long orderId;
+    private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
 
-    @Column(name = "estado", nullable = false)
-    private String estado;
+    @Column(nullable = false)
+    private Integer cantidad;
 
-    @Column(name = "subtotal", nullable = false)
-    private Double subtotal;
-
-    @Column(name = "descuento", nullable = false)
-    private Double descuento;
-
-    @Column(name = "total", nullable = false)
-    private Double total;
-
-    @Column(name= "fecha", nullable = false)
-    private LocalDateTime fecha;
-
-    @Transient
-    private List<DetalleOrder> detalles;
+    @Column(nullable = false)
+    private Double precioUnitario;
 
     @Embedded
     private Audit audit = new Audit();

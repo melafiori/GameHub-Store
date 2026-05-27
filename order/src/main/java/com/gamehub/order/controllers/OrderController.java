@@ -1,51 +1,40 @@
 package com.gamehub.order.controllers;
 
 import com.gamehub.order.models.Order;
+import com.gamehub.order.models.OrderDetalle;
+import com.gamehub.order.models.dtos.OrderRequestDTO;
 import com.gamehub.order.services.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
 public class OrderController {
-    private final OrderService orderService;
 
-    @GetMapping
-    public List<Order> findAll() {
-        return orderService.findAll();
-    }
-
-    @GetMapping("/{id}")
-    public Order findById(@PathVariable Long id) {
-        return orderService.findById(id);
-    }
+    @Autowired
+    private OrderService orderService;
 
     @PostMapping
-    public Order save(@Valid @RequestBody Order order) {
-        return orderService.save(order);
+    public ResponseEntity<?> checkout(@Valid @RequestBody OrderRequestDTO orderRequestDto) {
+        try {
+            OrderDetalle nuevaOrden = orderService.crearOrden(orderRequestDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevaOrden);
+        } catch (RuntimeException e) {
+            // Si salta falta de stock o error de conexión, devolvemos un 400 Bad Request con la razón
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
-    @PutMapping("/{id}")
-    public Order updateById(@PathVariable Long id,@RequestBody Order order) {
-        return orderService.updateById(id, order);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable Long id) {
-        orderService.deleteById(id);
-    }
-
-    @GetMapping("/user/{userId}")
-    public List<Order> findByUserId(@PathVariable Long userId) {
-        return orderService.findByUserId(userId);
-    }
-
-    @GetMapping("/estado/{estado}")
-    public List<Order> findByEstado(@PathVariable String estado) {
-        return orderService.findByEstado(estado);
+    @GetMapping("/history")
+    public ResponseEntity<List<OrderDetalle>> getHistory(@RequestParam String email) {
+        List<OrderDetalle> historial = orderService.obtenerHistorialPorEmail(email);
+        return ResponseEntity.ok(historial);
     }
 }

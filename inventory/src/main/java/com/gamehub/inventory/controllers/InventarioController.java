@@ -22,16 +22,26 @@ public class InventarioController {
     @Autowired
     private InventarioService inventarioService;
 
+    @Autowired
+    private InventarioRepository inventarioRepository;
+
     @GetMapping
     public ResponseEntity<List<InventarioResponseDto>> getAll() {
         return ResponseEntity.ok(this.inventarioService.findAll());
     }
 
+    @GetMapping("/check")
+    public ResponseEntity<Boolean> checkStock(
+            @RequestParam("productId") Long productId,
+            @RequestParam("cantidad") Integer cantidad) {
+
+        return inventarioRepository.findById(productId)
+                .map(inv -> ResponseEntity.ok(inv.getStockDisponible() >= cantidad))
+                .orElse(ResponseEntity.ok(false));
+    }
     @GetMapping("/{id}")
-    public ResponseEntity<Inventario> getById(@PathVariable Long id) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(this.inventarioService.getById(id));
+    public ResponseEntity<?> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(inventarioService.getById(id));
     }
 
     @PostMapping
