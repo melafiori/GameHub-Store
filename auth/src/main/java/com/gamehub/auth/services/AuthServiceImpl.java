@@ -1,53 +1,54 @@
 package com.gamehub.auth.services;
 
-import com.gamehub.auth.exceptions.AuthException;
+import com.gamehub.auth.clients.UserClient;
 import com.gamehub.auth.models.Auth;
+import com.gamehub.auth.models.dtos.AuthDTO;
 import com.gamehub.auth.repositories.AuthRepository;
+import com.gamehub.auth.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
     @Autowired
-    private AuthRepository authRepository;
+    private AuthRepository authUserRepository;
+
+    @Autowired
+    private UserClient userFeignClient;
 
     @Override
-    public List<Auth> getAll() {
-        return this.authRepository.findAll();
-    }
-
-    @Override
-    public Auth findById(Long id) {
-        return this.authRepository.findById(id).orElseThrow(
-                () -> new AuthException("Cuenta de acceso no encontrada.")
-        );
-    }
-
-    @Override
-    public Auth save(Auth auth) {
-        if (this.authRepository.findById(auth.getAuthId()).isPresent()) {
-            throw new AuthException("Cuenta de acceso ya existente.");
+    public String registrar(AuthDTO authDto) {
+        try {
+            userFeignClient.getByEmail(authDto.getEmail());
+        } catch (Exception e) {
+            throw new RuntimeException("No se puede crear la credencial: El usuario no está registrado en el sistema de perfiles.");
         }
-        return this.authRepository.save(auth);
+
+        if (authUserRepository.findByEmail(authDto.getEmail()).isPresent()) {
+            throw new RuntimeException("Las credenciales para este correo ya existen.");
+        }
+
+        Auth authUser = new Auth();
+        authUser.setEmail(authDto.getEmail());
+        authUser.setPasswordHash(authDto.getPassword());
+        authUser.setRol("CLIENTE");
+        authUser.setEstado("ACTIVO");
+
+        authUserRepository.save(authUser);
+
+        return "Credenciales registradas exitosamente de forma lógica.";
     }
 
     @Override
-    public Auth updateById(Long id, Auth auth) {
-        return this.authRepository.findById(id).map( element -> {
-            element.setEmail(auth.getEmail());
-            element.setRol(auth.getRol());
-            element.setEstado(auth.getEstado());
-            return this.authRepository.save(element);
-        }).orElseThrow(
-                () -> new AuthException("Cuenta de acceso no encontrada.")
-        );
-    }
+    public String login(AuthDTO authDto) {
+        Auth authUser = authUserRepository.findByEmail(authDto.getEmail())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado o credenciales incorrectas."));
 
-    @Override
-    public void deleteById(Long id) {
-        this.authRepository.deleteById(id);
+        if (!authUser.getPasswordHash().equals(authDto.getPassword())) {
+            throw new RuntimeException("Usuario no encontrado o credenciales incorrectas.");
+        }
+
+        return "Token simulado para prueba: " + authUser.getEmail().toUpperCase();
     }
 }
