@@ -3,6 +3,9 @@ package com.gamehub.user.controllers;
 import com.gamehub.user.models.User;
 import com.gamehub.user.services.UserService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
@@ -10,42 +13,50 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 
 public class UserController {
-    private final UserService userService;
+    @Autowired
+    private UserService userService;
 
     @GetMapping
-    public List<User> findAll() {
-        return userService.findAll();
+    public ResponseEntity<List<User>> getAll() {
+        return ResponseEntity.ok(userService.findAll());
     }
 
     @GetMapping("/{id}")
-    public User findById(@PathVariable Long id) {
-        return userService.findById(id);
+    public ResponseEntity<User> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(this.userService.findById(id));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<User> getByCorreo(@RequestParam String correo) {
+        return ResponseEntity.ok(this.userService.findByEmail(correo));
     }
 
     @PostMapping
-    public User save(@Valid @RequestBody User user) {
-        return userService.save(user);
+    public ResponseEntity<User> save(@Valid @RequestBody User user) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(user));
     }
 
     @PutMapping("/{id}")
-    public User updateById(@PathVariable Long id, @RequestBody User user) {
-        return userService.updateById(id, user);
+    public ResponseEntity<User> updateById(@PathVariable Long id, @RequestBody User user) {
+        return ResponseEntity.ok(userService.updateById(id, user));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable Long id) { userService.deleteById(id);
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+        this.userService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/rol/{rol}")
-    public List<User> findByRol(@PathVariable String rol) {
-        return userService.findByRol(rol);
+    public ResponseEntity<List<User>> findByRol(@PathVariable String rol) {
+        return ResponseEntity.ok(userService.findByRol(rol));
     }
 
     @GetMapping("/estado/{estado}")
-    public List<User> findByEstado(@PathVariable String estado) {
-        return userService.findByEstado(estado);
+    public ResponseEntity<List<User>> findByEstado(@PathVariable String estado) {
+        return ResponseEntity.ok(userService.findByEstado(estado));
     }
 }

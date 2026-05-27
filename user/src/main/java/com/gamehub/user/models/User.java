@@ -24,6 +24,10 @@ public class User{
     @NotBlank(message = "El campo nombre del usuario no puede estar vacío.")
     private String nombre;
 
+    @Column(name = "user_rut", nullable = false, unique = true)
+    @NotBlank(message = "El campo rut del usuario no puede estar vacío.")
+    private String rut;
+
     @Email
     @Column(unique = true)
     @NotBlank(message = "El campo email del usuario no puede estar vacío.")
