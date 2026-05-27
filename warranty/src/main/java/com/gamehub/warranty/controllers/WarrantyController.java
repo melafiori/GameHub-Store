@@ -39,14 +39,14 @@ public class WarrantyController {
         warrantyService.deleteById(id);
     }
 
-    @GetMapping("/usuario/{usuarioId}")
+    @GetMapping("/user/{userId}")
     public List<Warranty> findByUserId(
             @PathVariable Long userId) {
 
         return warrantyService.findByUserId(userId);
     }
 
-    @GetMapping("/producto/{productoId}")
+    @GetMapping("/product/{productId}")
     public List<Warranty> findByProductId(@PathVariable Long productId) {
 
         return warrantyService.findByProductId(productId);
