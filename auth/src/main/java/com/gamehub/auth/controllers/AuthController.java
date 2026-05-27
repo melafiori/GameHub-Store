@@ -1,6 +1,7 @@
 package com.gamehub.auth.controllers;
 
 import com.gamehub.auth.models.Auth;
+import com.gamehub.auth.models.dtos.AuthDTO;
 import com.gamehub.auth.services.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,45 +13,30 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/auths")
+@RequestMapping("/api/v1/auth")
 @Validated
 public class AuthController {
 
     @Autowired
     private AuthService authService;
 
-    @GetMapping
-    public ResponseEntity<List<Auth>> findAll() {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(this.authService.getAll());
+    @PostMapping("/register")
+    public ResponseEntity<String> registrar(@Valid @RequestBody AuthDTO authDTO) {
+        try {
+            String respuesta = authService.registrar(authDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Auth> findById(@PathVariable Long id) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(this.authService.findById(id));
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@Valid @RequestBody AuthDTO authDTO) {
+        try {
+            String tokenSimulado = authService.login(authDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(tokenSimulado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
     }
-
-    @PostMapping
-    public ResponseEntity<Auth> save(@Valid @RequestBody Auth auth) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(this.authService.save(auth));
-    }
-
-    @PutMapping("/{id}")
-    public  ResponseEntity<Auth> update(@PathVariable Long id, @Valid @RequestBody Auth auth) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(this.authService.updateById(id, auth));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        this.authService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-
 }

@@ -8,7 +8,7 @@ import lombok.ToString;
 
 import java.time.LocalDateTime;
 
-
+@Entity
 @Table(name = "auth")
 @Getter
 @Setter
@@ -34,8 +34,6 @@ public class Auth {
     @Column(name = "estado", nullable = false)
     private String estado;
 
-    @Column(name = "fecha_creacion", nullable = false)
-    private LocalDateTime fechaCreacion;
 
     @Embedded
     private Audit audit = new Audit();

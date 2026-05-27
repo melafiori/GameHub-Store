@@ -29,11 +29,6 @@ public class UserController {
         return ResponseEntity.ok(this.userService.findById(id));
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<User> getByCorreo(@RequestParam String correo) {
-        return ResponseEntity.ok(this.userService.findByEmail(correo));
-    }
-
     @PostMapping
     public ResponseEntity<User> save(@Valid @RequestBody User user) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(user));
@@ -58,5 +53,12 @@ public class UserController {
     @GetMapping("/estado/{estado}")
     public ResponseEntity<List<User>> findByEstado(@PathVariable String estado) {
         return ResponseEntity.ok(userService.findByEstado(estado));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<User> getByEmail(@RequestParam String email) {
+        return userService.findByEmail(email)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CuentaAcceso extends Audit{
+public class CuentaAcceso{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cuenta_id")
