@@ -1,11 +1,12 @@
 package com.gamehub.product.services;
 
 import com.gamehub.product.models.Product;
+import com.gamehub.product.models.dtos.ProductDetalleDto;
 
 import java.util.List;
 
 public interface ProductService {
-    List<Product> findAll();
+    List<ProductDetalleDto> findAll();
     Product findById(Long id);
     Product findBySku(String sku);
     Product save(Product product);
