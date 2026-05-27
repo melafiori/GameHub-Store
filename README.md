@@ -15,7 +15,7 @@ El proyecto fue desarrollado utilizando:
 - Java 21
 - Spring Boot
 - Spring Data JPA
-- MySQL
+- H2 DATABASE
 - Maven
 - Lombok
 - OpenFeign
