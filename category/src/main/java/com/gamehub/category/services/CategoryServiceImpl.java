@@ -33,8 +33,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     @Override
     public Category save(Category category) {
-        if (this.categoryRepository.findById(category.getCategoryId()).isPresent()) {
-            throw new CategoryException("Categoria con id " + category.getCategoryId() + " ya existe.");
+        if (this.categoryRepository.findByNombre(category.getNombre()).isPresent()) {
+            throw new CategoryException("La categoría con el nombre '" + category.getNombre() + "' ya existe.");
         }
 
         return this.categoryRepository.save(category);

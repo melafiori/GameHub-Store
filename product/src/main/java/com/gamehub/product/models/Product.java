@@ -40,8 +40,8 @@ public class Product {
     @Column(name = "product_precio", nullable = false)
     private double precio;
 
-    // ToDo
-    // private Long categoriaId;
+    @Column(name = "category_id", nullable = false)
+    private Long categoryId;
 
     @Column(name = "product_descripcion", nullable = false)
     private String descripcion;
