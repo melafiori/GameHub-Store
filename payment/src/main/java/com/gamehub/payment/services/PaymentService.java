@@ -1,16 +1,7 @@
 package com.gamehub.payment.services;
 
-import com.gamehub.payment.models.Pago;
-
-import java.util.List;
+import com.gamehub.payment.models.Payment;
 
 public interface PaymentService {
-    List<Pago> findAll();
-    Pago findById(Long id);
-    Pago save(Pago pago);
-    Pago updateById(Long id, Pago pago);
-    void deleteById(Long id);
-    List<Pago> findByOrderId(Long orderId);
-    List<Pago> findByUserId(Long userId);
-    List<Pago> findByEstado(String estado);
+    Payment procesarPago(Payment request);
 }

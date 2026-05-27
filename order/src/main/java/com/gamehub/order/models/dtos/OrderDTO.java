@@ -1,12 +1,17 @@
 package com.gamehub.order.models.dtos;
 
-import lombok.Data;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
-@Data
+@NoArgsConstructor
+@Getter @Setter
+@ToString
 public class OrderDTO {
-    private Long userId;
-    private Double subtotal;
-    private Double descuento;
-    private Double total;
-    private String estado;
+    @NotNull(message = "El id del producto es obligatorio.")
+    private Long productId;
+
+    @NotNull(message = "La cantidad es obligatoria.")
+    @Min(value = 1, message = "La cantidad mínima de compra es 1.")
+    private Integer cantidad;
 }
