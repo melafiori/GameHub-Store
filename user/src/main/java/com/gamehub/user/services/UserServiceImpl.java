@@ -5,6 +5,7 @@ import com.gamehub.user.models.Direccion;
 import com.gamehub.user.models.User;
 import com.gamehub.user.repositories.DireccionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.gamehub.user.repositories.UserRepository;
@@ -15,26 +16,28 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
-    private final DireccionRepository direccionRepository;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private DireccionRepository direccionRepository;
 
 
     //Guardar o registrar usuario
     @Transactional
     @Override
-    public User save(User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new UserException("Correo ya se encuentra registrado");
+    public User save(User usuario) {
+        // Regla de negocio: Validar duplicidad de RUT
+        if (userRepository.findByRut(usuario.getRut()).isPresent()) {
+            throw new RuntimeException("El RUT ya se encuentra registrado.");
         }
-        user.setEstado("ACTIVO");
-        User savedUser = userRepository.save(user);
-        if(user.getDirecciones() != null) {
-            for (Direccion direccion : user.getDirecciones()) {
-                direccion.setUserId(savedUser.getUserId());
-                direccionRepository.save(direccion);
-            }
+
+        // Regla de negocio: Validar duplicidad de Correo
+        if (userRepository.findByEmail(usuario.getEmail()).isPresent()) {
+            throw new RuntimeException("El correo electrónico ya está en uso.");
         }
-        return savedUser;
+
+        return userRepository.save(usuario);
     }
 
     //Actualizar usuario por id
@@ -68,10 +71,24 @@ public class UserServiceImpl implements UserService {
                 () -> new UserException("Usuario con id: " + id + " no encontrado."));
     }
 
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(
+                () -> new UserException("Usuario con email: " + email + " no encontrado.")
+        );
+    }
+
     @Transactional
     @Override
     public List<User> findAll() {
         return userRepository.findAll();
+    }
+
+    @Override
+    public User findByRut(String rut) {
+        return userRepository.findByRut(rut).orElseThrow(
+                () -> new UserException("Usuario con rut: " + rut + " no encontrado.")
+        );
     }
 
     //Buscar usuario por rol
