@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/users")
-@Tag(name = "Controlador Usuario", description = "Gestiona las operaciones relacionadas con los usuarios de GameHub")
+@Tag(name = "User V1", description = "Métodos CRUD para gestión de usuarios.")
 
 public class UserController {
     @Autowired
