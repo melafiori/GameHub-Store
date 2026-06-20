@@ -37,7 +37,9 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Usuario encontrado"),
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
-    public ResponseEntity<User> getById(@PathVariable Long id) {
+    public ResponseEntity<User> getById(
+            @Parameter(description = "ID del usuario a buscar")
+            @PathVariable Long id) {
         return ResponseEntity.ok(this.userService.findById(id));
     }
 
@@ -47,7 +49,9 @@ public class UserController {
             @ApiResponse(responseCode = "201", description = "Usuario creado correctamente"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
-    public ResponseEntity<User> save(@Valid @RequestBody User user) {
+    public ResponseEntity<User> save(
+            @Parameter(description = "Datos del usuario a registrar")
+            @Valid @RequestBody User user) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(user));
     }
 
@@ -57,7 +61,12 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Usuario actualizado correctamente"),
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
-    public ResponseEntity<User> updateById(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<User> updateById(
+            @Parameter(description = "ID del usuario a actualizar")
+            @PathVariable Long id,
+
+            @Parameter(description = "Nuevos datos del usuario")
+            @RequestBody User user) {
         return ResponseEntity.ok(userService.updateById(id, user));
     }
 
@@ -67,7 +76,9 @@ public class UserController {
             @ApiResponse(responseCode = "204", description = "Uusario eliminado correctamente"),
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteById(
+            @Parameter(description = "ID del usuario a eliminar")
+            @PathVariable Long id) {
         this.userService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
@@ -75,14 +86,18 @@ public class UserController {
     @GetMapping("/rol/{rol}")
     @Operation(summary = "Buscar usuarios por rol", description = "Obtiene todos los usuarios que poseen un rol específico")
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Usuarios encontrados correctamente")})
-    public ResponseEntity<List<User>> findByRol(@PathVariable String rol) {
+    public ResponseEntity<List<User>> findByRol(
+            @Parameter(description = "Rol a buscar")
+            @PathVariable String rol) {
         return ResponseEntity.ok(userService.findByRol(rol));
     }
 
     @GetMapping("/estado/{estado}")
     @Operation(summary = "Buscar usuarios por estado", description = "Obtiene todos los usuarios según su estado")
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Usuarios encontrados correctamente")})
-    public ResponseEntity<List<User>> findByEstado(@PathVariable String estado) {
+    public ResponseEntity<List<User>> findByEstado(
+            @Parameter(description = "Estado del usuario")
+            @PathVariable String estado) {
         return ResponseEntity.ok(userService.findByEstado(estado));
     }
 
@@ -92,7 +107,9 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Usuario encontrado"),
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
-    public ResponseEntity<User> getByEmail(@RequestParam String email) {
+    public ResponseEntity<User> getByEmail(
+            @Parameter(description = "Correo electrónico del usuario")
+            @RequestParam String email) {
         return userService.findByEmail(email)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
