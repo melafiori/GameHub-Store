@@ -25,12 +25,13 @@ public class AuthControllerV2 {
     @Autowired
     private AuthService authService;
 
-    //SOLO EJEMPLO
-    @ApiResponse(responseCode = "200", description = "Opercación exitosa")
-    public ResponseEntity<CollectionModel<EntityModel<Auth>>> findAll(){
-        List<EntityModel<Auth>> entityModels = this.authService.findAll();
-        return ResponseEntity.ok(this.authService.findAll));
-    }
+
+//    //SOLO EJEMPLO
+//    @ApiResponse(responseCode = "200", description = "Opercación exitosa")
+//    public ResponseEntity<CollectionModel<EntityModel<Auth>>> findAll(){
+//        List<EntityModel<Auth>> entityModels = this.authService.findAll();
+//        return ResponseEntity.ok(this.authService.findAll));
+//    }
 
 
     @PostMapping("/register")
