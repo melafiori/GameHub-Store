@@ -43,6 +43,7 @@
 		<module>review</module>
 		<module>shipping</module>
 		<module>user</module>
+		<module>eureka</module>
 	</modules>
 
 	<dependencies>
