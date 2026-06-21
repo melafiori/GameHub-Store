@@ -4,10 +4,12 @@ import com.gamehub.inventory.controllers.InventarioController;
 import com.gamehub.inventory.models.Inventario;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+@Component
 public class InventoryModelAssemblers implements RepresentationModelAssembler <Inventario, EntityModel<Inventario>> {
     @Override
     public EntityModel<Inventario> toModel(Inventario inventario) {
