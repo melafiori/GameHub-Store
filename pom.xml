@@ -33,6 +33,8 @@
 
 	<packaging>pom</packaging>
 	<modules>
+		<module>eureka</module>
+		<module>gateway</module>
 		<module>auth</module>
 		<module>category</module>
 		<module>inventory</module>
