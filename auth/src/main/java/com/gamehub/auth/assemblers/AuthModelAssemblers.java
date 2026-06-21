@@ -1,6 +1,6 @@
 package com.gamehub.auth.assemblers;
 
-import com.gamehub.auth.controllers.AuthControllerV2;
+import com.gamehub.auth.controllers.AuthController;
 import com.gamehub.auth.models.Auth;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
@@ -17,7 +17,7 @@ public class AuthModelAssemblers implements RepresentationModelAssembler<Auth, E
     public EntityModel<Auth> toModel(Auth auth) {
         return EntityModel.of(
                 auth,
-                linkTo(methodOn(AuthControllerV2.class).findById(auth.getAuthId())).withSelfRel(),
-                linkTo(methodOn(AuthControllerV2.class).findAll()).withRel("auth"));
+                linkTo(methodOn(AuthController.class).findById(auth.getAuthId())).withSelfRel(),
+                linkTo(methodOn(AuthController.class).findAll()).withRel("auth"));
     }
 }
