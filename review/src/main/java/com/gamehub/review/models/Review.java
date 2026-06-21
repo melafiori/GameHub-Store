@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class Review extends Audit{
+public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

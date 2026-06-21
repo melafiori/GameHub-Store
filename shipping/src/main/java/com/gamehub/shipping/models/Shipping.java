@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Shipping extends Audit {
+public class Shipping  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
