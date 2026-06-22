@@ -83,7 +83,7 @@ public class CategoryServiceTest {
 
         assertThatThrownBy(() -> this.categoryService.findById(id))
                 .isInstanceOf(CategoryException.class)
-                .hasMessage("La categoría con id " + id + " no existe.");
+                .hasMessage("La categoría con ID " + id + " no existe.");
         verify(categoryRepository, times(1)).findById(id);
     }
 
@@ -119,7 +119,7 @@ public class CategoryServiceTest {
 
         assertThatThrownBy(()-> this.categoryService.updateById(id, this.categoryPrueba))
                 .isInstanceOf(CategoryException.class)
-                .hasMessage("La categoria con id " + this.categoryPrueba.getCategoryId() + " no existe");
+                .hasMessage("La categoría con Id " + id + " no existe.");
         verify(categoryRepository, times(1)).findById(id);
         verify(categoryRepository, never()).save(any(Category.class));
     }

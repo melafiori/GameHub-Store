@@ -43,7 +43,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     @Override
     public void deleteById(Long id) {
-
+        this.categoryRepository.deleteById(id);
     }
 
     @Transactional
