@@ -80,7 +80,7 @@ public class UserServiceTest {
 
         assertThatThrownBy(() -> this.userService.findById(id))
                 .isInstanceOf(UserException.class)
-                .hasMessage("El usuario con id " + id + " no existe.");
+                .hasMessage("Usuario con id: " + id + " no encontrado.");
         verify(userRepository, times(1)).findById(id);
     }
 
@@ -90,7 +90,7 @@ public class UserServiceTest {
     public void shouldUpdateUsuario() {
         Long id = 1L;
         User cambios = new User();
-        cambios.setEstado("INACTIVO");
+        cambios.setEstado("ACTIVO");
         cambios.setNombre("Ejemplo Actualizado");
         cambios.setTelefono("123456789 actualizado");
 
@@ -100,7 +100,7 @@ public class UserServiceTest {
         User result = this.userService.updateById(id, cambios);
 
         assertThat(result.getNombre()).isEqualTo("Ejemplo Actualizado");
-        assertThat(result.getEstado()).isEqualTo("INACTIVO");
+        assertThat(result.getEstado()).isEqualTo("ACTIVO");
         assertThat(result.getTelefono()).isEqualTo("123456789 actualizado");
         verify(userRepository, times(1)).findById(id);
         verify(userRepository, times(1)).save(any(User.class));
@@ -115,7 +115,7 @@ public class UserServiceTest {
 
         assertThatThrownBy(() -> this.userService.updateById(id, this.userPrueba))
                 .isInstanceOf(UserException.class)
-                .hasMessage("El usuario con id " + this.userPrueba.getUserId() + " no existe.");
+                .hasMessage("Usuario con id: " + this.userPrueba.getUserId() + " no encontrado.");
         verify(userRepository, times(1)).findById(id);
         verify(userRepository, never()).save(any(User.class));
     }
