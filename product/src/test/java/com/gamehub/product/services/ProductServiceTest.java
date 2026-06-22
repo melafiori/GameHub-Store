@@ -50,6 +50,7 @@ public class ProductServiceTest {
         this.productPrueba.setModelo("Modelo de prueba");
         this.productPrueba.setPrecio(1000.00);
         this.productPrueba.setDescripcion("Descripcion de prueba");
+        this.productPrueba.setCategoryId(1L);
         this.productPrueba.setEstado("ACTIVO");
 
         Faker faker = new Faker(Locale.of("es", "CL"));
@@ -90,7 +91,7 @@ public class ProductServiceTest {
         assertThat(dto.getPrecio()).isEqualTo(1000.00);
         assertThat(dto.getDescripcion()).isEqualTo("Descripcion de prueba");
         assertThat(dto.getCategoria().getNombre()).isEqualTo("Categoria de prueba");
-        verify(categoryClient, times(1)).getCategoryById(20L);
+        verify(categoryClient, times(1)).getCategoryById(1L);
     }
 
     /** Verifica la búsqueda exitosa de una atención por id. */
@@ -116,7 +117,7 @@ public class ProductServiceTest {
 
         assertThatThrownBy(() -> this.productService.findById(id))
                 .isInstanceOf(ProductException.class)
-                .hasMessage("Producto con id " + id + " no encontrado.");
+                .hasMessage("Producto con id: " + id + " no encontrado.");
         verify(productRepository, times(1)).findById(id);
     }
 
@@ -130,6 +131,7 @@ public class ProductServiceTest {
         cambios.setEstado("INACTIVO");
         cambios.setPrecio(1000.00);
         cambios.setDescripcion("Producto actualizado");
+        cambios.setCategoryId(10L);
 
         CategoryDto categoryDto = new CategoryDto();
         categoryDto.setCategoryId(10L);
@@ -137,7 +139,6 @@ public class ProductServiceTest {
         when(this.productRepository.findById(id)).thenReturn(Optional.of(this.productPrueba));
         when(this.categoryClient.getCategoryById(10L)).thenReturn(categoryDto);
         when(this.productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
         Product result = this.productService.updateById(id, cambios);
 
         assertThat(result.getNombre()).isEqualTo("Actualizado");
@@ -156,7 +157,7 @@ public class ProductServiceTest {
 
         assertThatThrownBy(()-> this.productService.updateById(id, this.productPrueba))
                 .isInstanceOf(ProductException.class)
-                .hasMessage("Producto con id " + this.productPrueba.getProductId() + " no encontrado.");
+                .hasMessage("El producto con Id " + id +" no existe.");
         verify(productRepository, times(1)).findById(id);
         verify(productRepository, never()).save(any(Product.class));
     }
@@ -166,9 +167,13 @@ public class ProductServiceTest {
     @DisplayName("Debe eliminar un producto por su id")
     public void shouldDeleteProductById() {
         Long id = 1L;
+        Product product = new Product();
+
+        when(this.productRepository.findById(id)).thenReturn(Optional.of(product));
 
         this.productService.deleteById(id);
 
+        verify(productRepository, times(1)).findById(id);
         verify(productRepository, times(1)).deleteById(id);
     }
 //          NO ENTIENDO PQ NO FUNCIONA

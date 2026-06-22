@@ -75,13 +75,16 @@ public class ProductServiceImpl implements ProductService{
     @Transactional
     @Override
     public void deleteById(Long id) {
+        Product product = this.findById(id);
 
+        this.productRepository.deleteById(id);
     }
 
     @Transactional
     @Override
     public Product updateById(Long id, Product product) {
         return this.productRepository.findById(id).map(element -> {
+            element.setNombre(product.getNombre());
             element.setEstado(product.getEstado());
             element.setPrecio(product.getPrecio());
             element.setDescripcion(product.getDescripcion());

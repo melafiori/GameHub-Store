@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,6 +19,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 
@@ -115,7 +117,7 @@ public class UserServiceTest {
 
         assertThatThrownBy(() -> this.userService.updateById(id, this.userPrueba))
                 .isInstanceOf(UserException.class)
-                .hasMessage("Usuario con id: " + this.userPrueba.getUserId() + " no encontrado.");
+                .hasMessage("Usuario con id: " + id + " no encontrado.");
         verify(userRepository, times(1)).findById(id);
         verify(userRepository, never()).save(any(User.class));
     }
@@ -125,11 +127,16 @@ public class UserServiceTest {
     @DisplayName("Debe eliminar un usuario por su id")
     public void shouldDeleteUsuarioById() {
         Long id = 1L;
+        this.userPrueba.setEstado("ACTIVO");
 
         when(this.userRepository.findById(id)).thenReturn(Optional.of(this.userPrueba));
-        doNothing().when(this.userRepository).deleteById(id);
-
         this.userService.deleteById(id);
-    }
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository, times(1)).save(userCaptor.capture());
+
+        assertEquals("INACTIVO", userCaptor.getValue().getEstado());
+
+}
 
 }
