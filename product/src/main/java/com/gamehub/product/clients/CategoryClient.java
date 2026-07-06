@@ -7,9 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "msvc-category", url ="localhost:8001/api/v1/categories")
+@FeignClient(name = "msvc-category")
 public interface CategoryClient {
 
-    @GetMapping("/{id}")
+    @GetMapping("/api/v1/categories/{id}")
     CategoryDto getCategoryById(@PathVariable Long id);
 }
