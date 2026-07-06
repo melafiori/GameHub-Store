@@ -5,9 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "msvc-product", url ="localhost:8003/api/v1/products")
+@FeignClient(name = "msvc-product")
 public interface ProductClient {
 
-    @GetMapping("/{id}")
+    @GetMapping("/api/v1/products/{id}")
     ResponseEntity<Object> getProductById(@PathVariable("id") Long id);
 }
