@@ -24,6 +24,7 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /doc/swagger-ui.html
+  enable-hateoas: false
 
 server:
   port: 8002
