@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: msvc-auth
+
+  datasource:
+    url: jdbc:h2:file:./data/auths
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    defer-datasource-initialization: true
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+server:
+  port: 8001
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /docs/swagger-ui.html
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8013/eureka/
