@@ -85,18 +85,18 @@ Servidor de descubrimiento de servicios encargado de registrar y monitorear todo
 - Warranty Service ----	/api/v1/warranties/**
 
 ## Enlaces Swagger
-- http://localhost:8001/swagger-ui/index.html (Auth Service)
-- http://localhost:8002/swagger-ui/index.html (Category Service)
-- http://localhost:8003/swagger-ui/index.html (Inventory Service)
-- http://localhost:8004/swagger-ui/index.html (Notification Service)
-- http://localhost:8005/swagger-ui/index.html (Order Service)
-- http://localhost:8006/swagger-ui/index.html (Payment Service)
-- http://localhost:8007/swagger-ui/index.html (Product Service)
-- http://localhost:8008/swagger-ui/index.html (Promotion Service)
-- http://localhost:8009/swagger-ui/index.html (Review Service)
-- http://localhost:8010/swagger-ui/index.html (User Service)
-- http://localhost:8011/swagger-ui/index.html (Warranty Service)
-- http://localhost:8015/swagger-ui/index.html (Shipping Service)
+- http://localhost:8001/doc/swagger-ui/index.html (Auth Service)
+- http://localhost:8002/doc/swagger-ui/index.html (Category Service)
+- http://localhost:8003/doc/swagger-ui/index.html (Inventory Service)
+- http://localhost:8004/doc/swagger-ui/index.html (Notification Service)
+- http://localhost:8005/doc/swagger-ui/index.html (Order Service)
+- http://localhost:8006/doc/swagger-ui/index.html (Payment Service)
+- http://localhost:8007/doc/swagger-ui.html (Product Service)
+- http://localhost:8008/doc/swagger-ui/index.html (Promotion Service)
+- http://localhost:8009/doc/swagger-ui/index.html (Review Service)
+- http://localhost:8010/doc/swagger-ui/index.html (User Service)
+- http://localhost:8011/doc/swagger-ui/index.html (Warranty Service)
+- http://localhost:8015/doc/swagger-ui/index.html (Shipping Service)
 
 ## Instrucciones Ejecución local
 ### Requisitos
