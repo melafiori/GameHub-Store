@@ -58,14 +58,35 @@ public class WarrantyController {
         return ResponseEntity.ok(warrantyService.findById(id));
     }
 
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<java.util.Map<String,String>> requestError(org.springframework.web.server.ResponseStatusException error) {
+        return ResponseEntity.status(error.getStatusCode()).body(java.util.Map.of("error", error.getReason() == null ? "Solicitud invalida" : error.getReason()));
+    }
+    @Autowired private com.gamehub.warranty.services.WarrantyRequestService requestService;
+    @Autowired private com.gamehub.warranty.repositories.WarrantyRepository repository;
+    @GetMapping("/orders/{orderId}/eligibility")
+    @Operation(summary="Consultar elegibilidad de garantia para una orden propia")
+    public com.gamehub.warranty.services.WarrantyRequestService.Eligibility eligibility(@org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt, @PathVariable Long orderId) { return requestService.eligibility(jwt, orderId); }
+    public record CreateRequest(Long orderId, Long productId, String motivo) {}
     @PostMapping
-    @Operation(summary = "Guardado de garantías", description = "Esta es la forma de guardar una garantía.")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Garantía a crear", required = true,
-            content = @Content(schema = @Schema(implementation = WarrantyDTO.class))
-    )
-    public ResponseEntity<Warranty> save(@Valid @RequestBody Warranty warranty) {
-        return ResponseEntity.ok(this.warrantyService.save(warranty));
+    @Operation(summary="Solicitar garantia para una orden propia entregada")
+    public ResponseEntity<Warranty> create(@org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt, @RequestBody CreateRequest request) {
+        return ResponseEntity.status(201).body(requestService.create(jwt, request.orderId(), request.productId(), request.motivo()));
+    }
+    @GetMapping("/me")
+    @Operation(summary="Consultar garantias propias")
+    public List<Warranty> mine(@org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {
+        return repository.findByUserId(Long.valueOf(jwt.getSubject()));
+    }
+
+    public record ResolutionRequest(String estado, String resolucion) {}
+    @PatchMapping("/{id}/resolution")
+    @Operation(summary="Resolver una garantia", description="Exige una resolucion para cerrar, aprobar o rechazar.")
+    public ResponseEntity<?> resolve(@PathVariable Long id, @RequestBody ResolutionRequest request) {
+        if (request.estado() == null || !java.util.Set.of("CERRADA", "APROBADA", "RECHAZADA").contains(request.estado()) || request.resolucion() == null || request.resolucion().isBlank())
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", "Debe ingresar un estado final y una resolucion"));
+        try { Warranty changes = new Warranty(); changes.setEstado(request.estado()); changes.setResolution(request.resolucion().trim()); return ResponseEntity.ok(warrantyService.updateById(id, changes)); }
+        catch (com.gamehub.warranty.exceptions.WarrantyException e) { return ResponseEntity.status(404).body(java.util.Map.of("error", e.getMessage())); }
     }
 
     @PutMapping("/{id}")

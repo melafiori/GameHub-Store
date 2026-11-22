@@ -44,16 +44,34 @@ public class ReviewController {
         return reviewService.findById(id);
     }
 
+    @Autowired private ReviewPreparationService preparation;
+    @Autowired private com.gamehub.review.repositories.ReviewRepository repository;
+    public record CreateReview(Long orderId, Long productId, Integer puntuacion, String comentario) {}
+
     @PostMapping
-    @Operation(summary = "Crear reseña", description = "Registra una nueva reseña para un producto")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Reseña creada correctamente"),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos")
-    })
-    public Review save(
-            @Parameter(description = "Datos de la reseña a registrar")
-            @Valid @RequestBody Review review) {
-        return reviewService.save(review);
+    @Operation(summary = "Crear una reseña por orden pagada")
+    @ApiResponses({@ApiResponse(responseCode = "201", description = "Reseña creada"), @ApiResponse(responseCode = "409", description = "Orden ya reseñada")})
+    public org.springframework.http.ResponseEntity<?> create(@org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt, @RequestBody CreateReview request) {
+        Review review = preparation.prepare(jwt, request.orderId(), request.productId(), request.puntuacion(), request.comentario());
+        review.setEstado("ACTIVA"); review.setFecha(java.time.LocalDateTime.now());
+        try {
+            Review saved = repository.saveAndFlush(review);
+            return org.springframework.http.ResponseEntity.status(201).body(new PublicReview(saved.getResenaId(), saved.getPuntuacion(), saved.getComentario(), saved.getFecha()));
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            return org.springframework.http.ResponseEntity.status(409).body(java.util.Map.of("error", "Esta orden ya fue reseñada"));
+        }
+    }
+
+    public record VisibilityRequest(Boolean visible) {}
+
+    @PatchMapping("/{id}/visibility")
+    @Operation(summary = "Ocultar o publicar una rese?a", description = "Solo ADMINISTRADOR. Conserva la rese?a y su v?nculo con la orden.")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Visibilidad actualizada"), @ApiResponse(responseCode = "400", description = "Se requiere visible"), @ApiResponse(responseCode = "403", description = "Rol no autorizado"), @ApiResponse(responseCode = "404", description = "Rese?a no encontrada")})
+    public Review changeVisibility(@PathVariable Long id, @RequestBody VisibilityRequest request) {
+        if (request.visible() == null) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Debe indicar visible");
+        Review review = repository.findById(id).orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Rese?a no encontrada"));
+        review.setEstado(request.visible() ? "ACTIVA" : "OCULTA");
+        return repository.save(review);
     }
 
     @PutMapping("/{id}")
@@ -83,15 +101,15 @@ public class ReviewController {
         reviewService.deleteById(id);
     }
 
+    public record PublicReview(Long resenaId, Integer puntuacion, String comentario, java.time.LocalDateTime fecha) {}
+
     @GetMapping("/product/{productId}")
-    @Operation(summary = "Buscar reseñas por producto", description = "Obtiene todas las reseñas asociadas a un producto específico")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Reseñas encontradas correctamente")
-    })
-    public List<Review> findByProductId(
-            @Parameter(description = "ID del producto")
-            @PathVariable Long productId) {
-        return reviewService.findByProductId(productId);
+    @Operation(summary = "Consultar reseñas activas de un producto")
+    public List<PublicReview> publicReviews(@PathVariable Long productId) {
+        return reviewService.findByProductId(productId).stream()
+                .filter(r -> "ACTIVA".equals(r.getEstado()))
+                .map(r -> new PublicReview(r.getResenaId(), r.getPuntuacion(), r.getComentario(), r.getFecha()))
+                .toList();
     }
 
     @GetMapping("/user/{userId}")

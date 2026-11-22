@@ -2,6 +2,7 @@ package com.gamehub.product.services;
 
 
 import com.gamehub.product.clients.CategoryClient;
+import com.gamehub.product.clients.InventoryClient;
 import com.gamehub.product.exceptions.ProductException;
 import com.gamehub.product.models.Product;
 import com.gamehub.product.models.dtos.CategoryDto;
@@ -34,6 +35,9 @@ public class ProductServiceTest {
 
     @Mock
     private CategoryClient categoryClient;
+
+    @Mock
+    private InventoryClient inventoryClient;
 
     @InjectMocks
     private ProductServiceImpl productService;
@@ -71,9 +75,13 @@ public class ProductServiceTest {
     @Test
     @DisplayName("Debe listar todos los productos enriquecidos")
     public void shouldListAllProductos(){
+        productPrueba.setImagen("https://example.test/producto.jpg");
+        productPrueba.setEspecificaciones("{\"Color\":\"Negro\"}");
         when(this.productRepository.findAll()).thenReturn(List.of(this.productPrueba));
+        when(this.inventoryClient.getStock(1L)).thenReturn(0);
 
         CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setEstado("ACTIVO");
         categoryDto.setCategoryId(1L);
         categoryDto.setNombre("Categoria de prueba");
         categoryDto.setEstado("ACTIVO");
@@ -90,6 +98,9 @@ public class ProductServiceTest {
         assertThat(dto.getModelo()).isEqualTo("Modelo de prueba");
         assertThat(dto.getPrecio()).isEqualTo(1000.00);
         assertThat(dto.getDescripcion()).isEqualTo("Descripcion de prueba");
+        assertThat(dto.getImagen()).isEqualTo("https://example.test/producto.jpg");
+        assertThat(dto.getEspecificaciones()).isEqualTo("{\"Color\":\"Negro\"}");
+        assertThat(dto.getStock()).isZero();
         assertThat(dto.getCategoria().getNombre()).isEqualTo("Categoria de prueba");
         verify(categoryClient, times(1)).getCategoryById(1L);
     }
@@ -134,6 +145,7 @@ public class ProductServiceTest {
         cambios.setCategoryId(10L);
 
         CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setEstado("ACTIVO");
         categoryDto.setCategoryId(10L);
 
         when(this.productRepository.findById(id)).thenReturn(Optional.of(this.productPrueba));
@@ -174,7 +186,8 @@ public class ProductServiceTest {
         this.productService.deleteById(id);
 
         verify(productRepository, times(1)).findById(id);
-        verify(productRepository, times(1)).deleteById(id);
+        verify(productRepository, times(1)).save(product);
+        assertThat(product.getEstado()).isEqualTo("INACTIVO");
     }
 //          NO ENTIENDO PQ NO FUNCIONA
 //    /** Verifica el listado de productos por categoria. */
@@ -190,4 +203,17 @@ public class ProductServiceTest {
 //        verify(productRepository, times(1)).findById(idCategoria);
 //    }
 
+    @Test
+    void createRejectsMissingCategory() {
+        productPrueba.setCategoryId(null);
+        assertThatThrownBy(() -> productService.save(productPrueba)).isInstanceOf(org.springframework.web.server.ResponseStatusException.class);
+        verify(productRepository, never()).save(any());
+    }
+    @Test
+    void createRejectsInactiveCategory() {
+        CategoryDto inactive = new CategoryDto(); inactive.setEstado("INACTIVO");
+        when(categoryClient.getCategoryById(1L)).thenReturn(inactive);
+        assertThatThrownBy(() -> productService.save(productPrueba)).isInstanceOf(org.springframework.web.server.ResponseStatusException.class).hasMessageContaining("desactivada");
+        verify(productRepository, never()).save(any());
+    }
 }

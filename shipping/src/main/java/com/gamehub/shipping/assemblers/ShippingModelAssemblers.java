@@ -14,9 +14,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class ShippingModelAssemblers implements RepresentationModelAssembler <Shipping, EntityModel<Shipping>> {
     @Override
     public EntityModel<Shipping> toModel(Shipping shipping) {
-        return EntityModel.of(
-                shipping,
-                linkTo(methodOn(ShippingController.class).findById(shipping.getShippingId())).withSelfRel(),
-                linkTo(methodOn(ShippingController.class).findAll()).withRel("shippings"));
+        return EntityModel.of(shipping);
     }
 }

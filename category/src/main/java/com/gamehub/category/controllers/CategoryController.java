@@ -27,6 +27,12 @@ public class CategoryController {
 
     @Autowired
     private CategoryService categoryService;
+    @Autowired private com.gamehub.category.clients.ProductCatalogClient products;
+
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<java.util.Map<String,String>> requestError(org.springframework.web.server.ResponseStatusException e) {
+        return ResponseEntity.status(e.getStatusCode()).body(java.util.Map.of("error", e.getReason() == null ? "Operacion invalida" : e.getReason()));
+    }
 
     @GetMapping
     @Operation(
@@ -56,8 +62,8 @@ public class CategoryController {
     public ResponseEntity<Category> getById(
             @Parameter(description = "Id de categoría a buscar")
             @PathVariable Long id) {
-        Category categoria = this.categoryService.findById(id);
-        return ResponseEntity.ok(categoria);
+        try { return ResponseEntity.ok(this.categoryService.findById(id)); }
+        catch (com.gamehub.category.exceptions.CategoryException e) { return ResponseEntity.notFound().build(); }
     }
 
     @PostMapping
@@ -81,6 +87,7 @@ public class CategoryController {
             @Parameter(description = "Id de la categoría a actualizar", required = true, example = "1")
             @PathVariable Long id,
             @Valid @RequestBody Category category) {
+        if ("INACTIVO".equalsIgnoreCase(category.getEstado())) ensureEmpty(id);
         Category categoriaActualizada = this.categoryService.updateById(id, category);
         return ResponseEntity.ok(categoriaActualizada);
     }
@@ -91,7 +98,18 @@ public class CategoryController {
     public ResponseEntity<Void> delete(
             @Parameter(description = "Id de la categoría a eliminar", required = true, example = "1")
             @PathVariable Long id) {
-        this.categoryService.deleteById(id);
+        ensureEmpty(id);
+        Category existing = categoryService.findById(id);
+        existing.setEstado("INACTIVO");
+        categoryService.updateById(id, existing);
         return ResponseEntity.noContent().build();
+    }
+    private void ensureEmpty(Long id) {
+        try {
+            if (products.products().stream().anyMatch(p -> p.categoria() != null && id.equals(p.categoria().categoryId())))
+                throw new org.springframework.web.server.ResponseStatusException(HttpStatus.CONFLICT, "No se puede desactivar la categoria: tiene productos asociados");
+        } catch (feign.FeignException e) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "No se pudo verificar los productos asociados");
+        }
     }
 }

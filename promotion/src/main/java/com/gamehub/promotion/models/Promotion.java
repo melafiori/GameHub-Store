@@ -36,6 +36,9 @@ public class Promotion {
     @Column(name = "monto_minimo", nullable = false)
     private Double montoMinimo;
 
+    @Column(name = "maximo_descuento")
+    private Double maximoDescuento;
+
     @Column(name = "usos_maximos", nullable = false)
     private Integer usosMaximos;
 

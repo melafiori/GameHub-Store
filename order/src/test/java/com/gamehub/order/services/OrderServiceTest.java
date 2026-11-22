@@ -17,6 +17,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.util.ReflectionTestUtils;
+import java.util.Optional;
 
 import java.util.List;
 import java.util.Map;
@@ -38,6 +40,9 @@ public class OrderServiceTest {
     @Mock
     private ProductClient productClient;
 
+    @Mock
+    private com.gamehub.order.clients.PromotionClient promotionClient;
+
     @InjectMocks
     private OrderServiceImpl orderService;
 
@@ -51,6 +56,8 @@ public class OrderServiceTest {
 
     @BeforeEach
     public void setUp() {
+        ReflectionTestUtils.setField(orderService, "inventorySecret", "0123456789abcdef0123456789abcdef");
+        ReflectionTestUtils.setField(orderService, "promotionSecret", "0123456789abcdef0123456789abcdef");
         this.faker = new Faker();
 
         this.productId = this.faker.number().randomNumber(5, true);
@@ -71,6 +78,75 @@ public class OrderServiceTest {
                 "nombre", this.faker.commerce().productName(),
                 "precio", this.precioProducto
         );
+    }
+
+    @Test
+    void orderUsesCurrentPriceAndKeepsItOnRetry() {
+        when(orderRepository.findByCustomerIdAndIdempotencyKey(7L, "oferta")).thenReturn(Optional.empty());
+        when(productClient.getProductById(2L)).thenReturn(ResponseEntity.ok(Map.of("precio", 999990, "precioVigente", 899991, "estado", "ACTIVO")));
+        when(orderRepository.saveAndFlush(any(OrderDetalle.class))).thenAnswer(call -> { OrderDetalle order = call.getArgument(0); order.setOrderId(44L); return order; });
+        when(inventoryClient.reserve(eq("order-44"), anyString(), anyMap())).thenReturn(Map.of("estado", "RESERVADO"));
+        var order = orderService.crearPendiente(7L, "oferta", Map.of(2L, 2));
+        assertThat(order.getSubtotal()).isEqualTo(1799982);
+        assertThat(order.getItems().get(0).getPrecioUnitario()).isEqualTo(899991);
+        when(orderRepository.findByCustomerIdAndIdempotencyKey(7L, "oferta")).thenReturn(Optional.of(order));
+        assertThat(orderService.crearPendiente(7L, "oferta", Map.of(2L, 2)).getSubtotal()).isEqualTo(1799982);
+        verify(productClient, times(1)).getProductById(2L);
+    }
+
+    @Test
+    void retryAfterLostResponseReusesPersistedOrderId() {
+        when(orderRepository.findByCustomerIdAndIdempotencyKey(7L, "clave-1")).thenReturn(Optional.empty());
+        when(productClient.getProductById(10L)).thenReturn(ResponseEntity.ok(Map.of("precio", 1000, "precioVigente", 1000, "estado", "ACTIVO")));
+        when(orderRepository.saveAndFlush(any(OrderDetalle.class))).thenAnswer(call -> {
+            OrderDetalle order = call.getArgument(0); order.setOrderId(42L); return order;
+        });
+        when(inventoryClient.reserve(eq("order-42"), anyString(), anyMap()))
+                .thenThrow(new RuntimeException("respuesta perdida")).thenReturn(Map.of("estado", "RESERVADO"));
+        assertThatThrownBy(() -> orderService.crearPendiente(7L, "clave-1", Map.of(10L, 2)))
+                .hasMessage("respuesta perdida");
+        var saved = org.mockito.ArgumentCaptor.forClass(OrderDetalle.class);
+        verify(orderRepository).saveAndFlush(saved.capture());
+        OrderDetalle pending = saved.getValue();
+        assertThat(pending.getEstado()).isEqualTo("RESERVA_PENDIENTE");
+        when(orderRepository.findByCustomerIdAndIdempotencyKey(7L, "clave-1")).thenReturn(Optional.of(pending));
+        assertThatThrownBy(() -> orderService.crearPendiente(7L, "clave-1", Map.of(10L, 3)))
+                .isInstanceOf(IllegalStateException.class);
+        OrderDetalle recovered = orderService.crearPendiente(7L, "clave-1", Map.of(10L, 2));
+        assertThat(recovered.getOrderId()).isEqualTo(42L);
+        assertThat(recovered.getEstado()).isEqualTo("PENDIENTE_DE_PAGO");
+        assertThat(recovered.getTotal()).isEqualTo(2000);
+        verify(inventoryClient, times(2)).reserve(eq("order-42"), anyString(), eq(Map.of(10L, 2)));
+    }
+
+    @Test void stockFailureDoesNotConsumeCoupon() {
+        when(orderRepository.findByCustomerIdAndIdempotencyKey(7L,"stock-cupons")).thenReturn(Optional.empty());
+        when(productClient.getProductById(10L)).thenReturn(ResponseEntity.ok(Map.of("precio",1000,"precioVigente",1000,"estado","ACTIVO")));
+        when(orderRepository.saveAndFlush(any(OrderDetalle.class))).thenAnswer(call -> {OrderDetalle order=call.getArgument(0);order.setOrderId(55L);return order;});
+        when(inventoryClient.reserve(anyString(),anyString(),anyMap())).thenThrow(mock(feign.FeignException.Conflict.class));
+        var order=orderService.crearPendiente(7L,"stock-cupons",Map.of(10L,2),new com.gamehub.order.models.ShippingAddress("R","C","D"),"NEON10");
+        assertThat(order.getEstado()).isEqualTo("RECHAZADA");
+        verifyNoInteractions(promotionClient);
+    }
+
+    @Test
+    void addressIsSnapshottedAndChangedRetryConflicts() {
+        var address = new com.gamehub.order.models.ShippingAddress("Metropolitana", "Santiago", "Calle 123");
+        when(orderRepository.findByCustomerIdAndIdempotencyKey(7L, "direccion"))
+            .thenReturn(Optional.empty());
+        when(productClient.getProductById(10L)).thenReturn(ResponseEntity.ok(Map.of("precio", 1000, "precioVigente", 1000, "estado", "ACTIVO")));
+        when(orderRepository.saveAndFlush(any(OrderDetalle.class))).thenAnswer(call -> {
+            OrderDetalle order = call.getArgument(0); order.setOrderId(42L); return order;
+        });
+        when(inventoryClient.reserve(eq("order-42"), anyString(), anyMap())).thenReturn(Map.of("estado", "RESERVADO"));
+        OrderDetalle order = orderService.crearPendiente(7L, "direccion", Map.of(10L, 1), address);
+        address.setDireccion("otra direccion");
+        assertThat(order.getDireccionDespacho().getDireccion()).isEqualTo("Calle 123");
+        when(orderRepository.findByCustomerIdAndIdempotencyKey(7L, "direccion")).thenReturn(Optional.of(order));
+        var original = new com.gamehub.order.models.ShippingAddress("Metropolitana", "Santiago", "Calle 123");
+        assertThat(orderService.crearPendiente(7L, "direccion", Map.of(10L, 1), original).getOrderId()).isEqualTo(42L);
+        assertThatThrownBy(() -> orderService.crearPendiente(7L, "direccion", Map.of(10L, 1), address)).isInstanceOf(IllegalStateException.class);
+        verify(inventoryClient, times(1)).reserve(anyString(), anyString(), anyMap());
     }
 
     /** Verifica que se crea una orden exitosamente cuando hay stock y el producto existe. */

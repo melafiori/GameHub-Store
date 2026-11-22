@@ -45,6 +45,8 @@
 		<module>review</module>
 		<module>shipping</module>
 		<module>user</module>
+		<module>notification</module>
+		<module>warranty</module>
 	</modules>
 
 	<dependencies>

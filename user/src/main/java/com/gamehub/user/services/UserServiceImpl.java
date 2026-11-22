@@ -23,6 +23,17 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private DireccionRepository direccionRepository;
 
+    @Transactional
+    public User registerOnce(String registrationId, User user) {
+        return userRepository.findByRegistrationId(registrationId).orElseGet(() -> {
+            user.setUserId(null);
+            user.setRegistrationId(registrationId);
+            user.setRol("CLIENTE");
+            user.setEstado("ACTIVO");
+            return save(user);
+        });
+    }
+
 
     //Guardar o registrar usuario
     @Transactional
@@ -30,15 +41,25 @@ public class UserServiceImpl implements UserService {
     public User save(User usuario) {
         // Regla de negocio: Validar duplicidad de RUT
         if (userRepository.findByRut(usuario.getRut()).isPresent()) {
-            throw new RuntimeException("El RUT ya se encuentra registrado.");
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "El RUT ya se encuentra registrado.");
         }
 
         // Regla de negocio: Validar duplicidad de Correo
         if (userRepository.findByEmail(usuario.getEmail()).isPresent()) {
-            throw new RuntimeException("El correo electrónico ya está en uso.");
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "El correo electrónico ya está en uso.");
         }
 
-        return userRepository.save(usuario);
+        List<Direccion> direcciones = usuario.getDirecciones();
+        User guardado = userRepository.save(usuario);
+        if (direcciones != null) {
+            for (Direccion direccion : direcciones) {
+                direccion.setId(null);
+                direccion.setUserId(guardado.getUserId());
+                direccionRepository.save(direccion);
+            }
+            guardado.setDirecciones(direcciones);
+        }
+        return guardado;
     }
 
     //Actualizar usuario por id
@@ -68,8 +89,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User findById(Long id) {
-        return userRepository.findById(id).orElseThrow(
+        User user = userRepository.findById(id).orElseThrow(
                 () -> new UserException("Usuario con id: " + id + " no encontrado."));
+        user.setDirecciones(direccionRepository.findByUserId(id));
+        return user;
     }
 
     @Override

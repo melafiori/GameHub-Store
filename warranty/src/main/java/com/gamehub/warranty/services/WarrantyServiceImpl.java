@@ -35,7 +35,19 @@ public class WarrantyServiceImpl implements WarrantyService {
     public Warranty updateById(Long id, Warranty warranty) {
 
         Warranty currentWarranty = this.findById(id);
-        currentWarranty.setEstado(warranty.getEstado());
+        String requestedState = warranty.getEstado();
+        if (requestedState == null || requestedState.isBlank()) {
+            throw new WarrantyException("Debe ingresar un estado");
+        }
+        requestedState = requestedState.trim().toUpperCase(java.util.Locale.ROOT);
+        if (!java.util.Set.of("PENDIENTE", "EN_REVISION", "CERRADA", "APROBADA", "RECHAZADA").contains(requestedState)) {
+            throw new WarrantyException("Estado de garantia invalido");
+        }
+        if (java.util.Set.of("CERRADA", "APROBADA", "RECHAZADA").contains(requestedState) &&
+                (warranty.getResolution() == null || warranty.getResolution().isBlank())) {
+            throw new WarrantyException("No se puede cerrar una garantia sin resolucion");
+        }
+        currentWarranty.setEstado(requestedState);
         currentWarranty.setResolution(warranty.getResolution());
 
         return warrantyRepository.save(currentWarranty);

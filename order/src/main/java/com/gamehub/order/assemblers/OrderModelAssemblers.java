@@ -16,8 +16,7 @@ public class OrderModelAssemblers implements RepresentationModelAssembler<OrderD
     @Override
     public EntityModel<OrderDetalle>toModel(OrderDetalle orderDetalle){
         return EntityModel.of(
-                orderDetalle,
-                linkTo(methodOn(OrderController.class).getHistory(orderDetalle.getUserEmail())).withRel("history"));
+                orderDetalle);
 
     }
 

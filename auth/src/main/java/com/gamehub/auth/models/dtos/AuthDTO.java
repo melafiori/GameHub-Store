@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
-@ToString
 @Getter @Setter
 @NoArgsConstructor
 public class AuthDTO {

@@ -49,9 +49,25 @@ public class InventarioController {
             @Parameter(description = "Cantidad solicitada.")
             @RequestParam("cantidad") Integer cantidad) {
 
-        return inventarioRepository.findById(productId)
+        if (cantidad == null || cantidad <= 0) return ResponseEntity.badRequest().build();
+        return inventarioRepository.findByProductId(productId)
                 .map(inv -> ResponseEntity.ok(inv.getStockDisponible() >= cantidad))
                 .orElse(ResponseEntity.ok(false));
+    }
+
+    @GetMapping("/product/{productId}/stock")
+    @Operation(summary = "Consultar stock por producto")
+    public ResponseEntity<Integer> stockByProduct(@PathVariable Long productId) {
+        return inventarioRepository.findByProductId(productId)
+                .map(inv -> ResponseEntity.ok(inv.getStockDisponible()))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/product/{productId}")
+    @Operation(summary = "Consultar inventario por producto")
+    public ResponseEntity<Inventario> inventoryByProduct(@PathVariable Long productId) {
+        return inventarioRepository.findByProductId(productId).map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
     @GetMapping("/{id}")
     @Operation(summary = "Buscar inventario por ID", description = "Obtiene un registro de inventario mediante su identificador.")

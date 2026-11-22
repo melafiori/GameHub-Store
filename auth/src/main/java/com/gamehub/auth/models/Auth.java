@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@ToString
 public class Auth {
 
 
@@ -22,7 +21,7 @@ public class Auth {
     @Column(name = "auth_id", nullable = false)
     private Long authId;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "hash_pswd", nullable = false)
@@ -33,6 +32,9 @@ public class Auth {
 
     @Column(name = "estado", nullable = false)
     private String estado;
+
+    @Column(name = "profile_id")
+    private Long profileId;
 
 
     @Embedded

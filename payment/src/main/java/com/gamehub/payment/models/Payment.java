@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "payments")
+@Table(name = "payments", uniqueConstraints = @UniqueConstraint(columnNames = "order_id"))
 @NoArgsConstructor
 @Getter @Setter
 @ToString
