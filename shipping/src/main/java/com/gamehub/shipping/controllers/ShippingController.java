@@ -1,125 +1,47 @@
 package com.gamehub.shipping.controllers;
-
+import com.gamehub.shipping.clients.OrderClient;
 import com.gamehub.shipping.models.Shipping;
-import com.gamehub.shipping.models.dtos.ShippingDTO;
-import com.gamehub.shipping.services.ShippingService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
+import com.gamehub.shipping.repositories.ShippingRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
+import org.springframework.web.server.ResponseStatusException;
+import java.time.LocalDateTime;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 @RestController
 @RequestMapping("/api/v1/shippings")
-@Validated
-@Tag(name="Shipping V1", description = "Metodos CRUD para la gestión de envíos.")
 public class ShippingController {
-
-    @Autowired
-    private ShippingService shippingService;
-
-    @GetMapping
-    @Operation(
-            summary = "Listado de todos los envíos",
-            description = "Se devuelve una lista de todos los envíos que se encuentran en la BD"
-    )
-    @ApiResponse(responseCode = "200", description = "Operación exitosa.")
-    public ResponseEntity<List<Shipping>> findAll() {
-        return ResponseEntity.ok(shippingService.findAll());
+    private final ShippingRepository repository; private final OrderClient orders; private final String secret;
+    public ShippingController(ShippingRepository repository,OrderClient orders,@Value("${SHIPPING_SERVICE_SECRET:}") String secret){this.repository=repository;this.orders=orders;this.secret=secret;}
+    public record StatusRequest(String estado) {}
+    @GetMapping public List<Shipping> findAll(){return repository.findAll();}
+    @PostMapping("/orders/{orderId}") public ResponseEntity<Shipping> create(@PathVariable Long orderId){
+        if(secret.getBytes(StandardCharsets.UTF_8).length<32) throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
+        OrderClient.Snapshot order;
+        try { order=orders.start(orderId,secret); } catch(feign.FeignException.Conflict e) {throw new ResponseStatusException(HttpStatus.CONFLICT,"Orden no disponible para despacho");}
+        if(!"PAGADA".equals(order.estado()) || order.direccionDespacho()==null || order.customerId()==null) return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        var existing=repository.findFirstByOrderId(orderId); if(existing.isPresent()) return ResponseEntity.ok(existing.get());
+        var address=order.direccionDespacho(); var shipping=new Shipping();
+        shipping.setOrderId(orderId);shipping.setUserId(order.customerId());shipping.setDireccion(address.direccion()+", "+address.comuna()+", "+address.region());
+        shipping.setTransportista("Por asignar");shipping.setTracking("GH-"+UUID.randomUUID());shipping.setEstado("PENDIENTE");shipping.setFechaEnvio(LocalDateTime.now());
+        try{return ResponseEntity.status(HttpStatus.CREATED).body(repository.saveAndFlush(shipping));}
+        catch(DataIntegrityViolationException e){return ResponseEntity.ok(repository.findFirstByOrderId(orderId).orElseThrow(() -> e));}
     }
-
-    @GetMapping("/{id}")
-    @Operation(
-            summary = "Busqueda de un envío",
-            description = "Se devuelve un envío, en caso contrario devuelve una excepción."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Envío encontrado",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Shipping.class))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Envío no se encuentra en la BD"
-            )
-    })
-    public ResponseEntity<Shipping> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(shippingService.findById(id));
-
+    @GetMapping("/order/{orderId}") public ResponseEntity<Shipping> byOrder(@PathVariable Long orderId,@AuthenticationPrincipal Jwt jwt){
+        var shipping=repository.findFirstByOrderId(orderId); if(shipping.isEmpty()) return ResponseEntity.noContent().build();
+        var role=jwt.getClaimAsString("role");
+        if("CLIENTE".equals(role) && !Objects.equals(shipping.get().getUserId().toString(),jwt.getSubject())) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return ResponseEntity.ok(shipping.get());
     }
-
-    @PostMapping
-    @Operation(summary = "Guardado de Envío", description = "Esta es la forma de guardar un envío.")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Envío a crear", required = true,
-            content = @Content(schema = @Schema(implementation = ShippingDTO.class))
-    )
-    public ResponseEntity<Shipping> save(@Valid @RequestBody Shipping shipping) {
-        return ResponseEntity.ok(shippingService.save(shipping));
-    }
-
-    @PutMapping("/{id}")
-    @Operation(summary = "Actualización de envíos", description = "Se actualizan los datos de un envío determinado.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Envío actualizado."),
-            @ApiResponse(responseCode = "404", description = "Envío no encontrado.")
-    })
-    public Shipping updateById(
-            @Parameter(description = "Id del envío a actualizar", required = true, example = "1")
-            @PathVariable Long id,
-            @RequestBody Shipping shipping) {
-        return shippingService.updateById(id, shipping);
-    }
-
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Eliminación de envíos", description = "Se elimina un envío determinado.")
-    @ApiResponse(responseCode = "204", description = "Envío eliminado")
-    public ResponseEntity<Void> deleteById(
-            @Parameter(description = "Id del envío a eliminar", required = true, example = "1")
-            @PathVariable Long id) {
-        this.shippingService.deleteById(id);
-        return ResponseEntity.noContent().build();
-
-    }
-
-    @GetMapping("/order/{orderId}")
-    @Operation(
-            summary = "Busqueda de un envío por ID de pedidos",
-            description = "Devuelve una lista de pedidos que compartan el mismo envío."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Pedido(s) encontrado(s)"),
-            @ApiResponse(responseCode = "404", description = "Pedido(s) no encontrado(s)")
-    })
-    public ResponseEntity<List<Shipping>> findByOrderId(
-            @Parameter(description = "Id del pedido", required = true, example = "1")
-            @PathVariable Long orderId) {
-        return ResponseEntity.ok(shippingService.findByOrderId(orderId));
-    }
-
-    @GetMapping("/estado/{estado}")
-    @Operation(
-            summary = "Busqueda de envíos por su estado.",
-            description = "Devuelve una lista de envíos que tengan un estado determinado."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Envío(s) encontrado(s)"),
-            @ApiResponse(responseCode = "404", description = "Envío(s) no encontrado(s)")
-    })
-    public ResponseEntity<List<Shipping>> findByEstado(
-            @Parameter(description = "Estado del pedido", required = true, example = "Pendiente")
-            @PathVariable String estado) {
-        return ResponseEntity.ok(shippingService.findByEstado(estado));
+    @PatchMapping("/{id}/status") public Shipping change(@PathVariable Long id,@RequestBody StatusRequest request){
+        Shipping shipping=repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        var next=Map.of("PENDIENTE","EN_PREPARACION","EN_PREPARACION","EN_CAMINO","EN_CAMINO","ENTREGADO");
+        if(request.estado()==null || (!request.estado().equals(shipping.getEstado()) && !request.estado().equals(next.get(shipping.getEstado())))) throw new ResponseStatusException(HttpStatus.CONFLICT,"Transicion no permitida");
+        if ("ENTREGADO".equals(request.estado()) && !"ENTREGADO".equals(shipping.getEstado())) shipping.setFechaEntrega(LocalDateTime.now());
+        shipping.setEstado(request.estado()); return repository.saveAndFlush(shipping);
     }
 }

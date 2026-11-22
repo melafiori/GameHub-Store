@@ -30,11 +30,6 @@ spring:
               predicates:
                 - Path=/api/v1/products/**
 
-            - id: user
-              uri: lb://MSVC-USER
-              predicates:
-                - Path=/api/v1/users/**
-
             - id: notification
               uri: lb://NOTIFICATION
               predicates:
@@ -68,7 +63,7 @@ spring:
             - id: shipping
               uri: lb://SHIPPING
               predicates:
-                - Path=/api/v1/shipping/**
+                - Path=/api/v1/shippings/**
 
 eureka:
   client:

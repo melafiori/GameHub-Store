@@ -3,6 +3,8 @@ package com.gamehub.user.services;
 import com.gamehub.user.exceptions.UserException;
 import com.gamehub.user.models.User;
 import com.gamehub.user.repositories.UserRepository;
+import com.gamehub.user.repositories.DireccionRepository;
+import com.gamehub.user.models.Direccion;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,11 +31,33 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private DireccionRepository direccionRepository;
+
     @InjectMocks
     private UserServiceImpl userService;
 
     private User userPrueba;
     private List<User> userList = new ArrayList<>();
+
+    @Test
+    void savesAddressWithCreatedUserId() {
+        Direccion direccion = new Direccion();
+        direccion.setUserId(999L);
+        userPrueba.setDirecciones(List.of(direccion));
+        when(userRepository.save(any(User.class))).thenReturn(userPrueba);
+        userService.save(userPrueba);
+        assertThat(direccion.getUserId()).isEqualTo(1L);
+        verify(direccionRepository).save(direccion);
+    }
+
+    @Test
+    void includesAddressesInProfile() {
+        Direccion direccion = new Direccion();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(userPrueba));
+        when(direccionRepository.findByUserId(1L)).thenReturn(List.of(direccion));
+        assertThat(userService.findById(1L).getDirecciones()).containsExactly(direccion);
+    }
 
     @BeforeEach
     public void setUp() {

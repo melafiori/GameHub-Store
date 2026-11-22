@@ -1,6 +1,7 @@
 package com.gamehub.product.services;
 
 import com.gamehub.product.clients.CategoryClient;
+import com.gamehub.product.clients.InventoryClient;
 import com.gamehub.product.exceptions.ProductException;
 import com.gamehub.product.models.Product;
 import com.gamehub.product.models.dtos.CategoryDto;
@@ -22,17 +23,29 @@ public class ProductServiceImpl implements ProductService{
     @Autowired
     private CategoryClient categoryClient;
 
+    @Autowired
+    private InventoryClient inventoryClient;
+
     @Override
     public List<ProductDetalleDto> findAll() {
         return this.productRepository.findAll().stream().map(p -> {
             ProductDetalleDto productoDetalle = new ProductDetalleDto();
             productoDetalle.setId(p.getProductId());
+            productoDetalle.setSku(p.getSku());
             productoDetalle.setNombre(p.getNombre());
             productoDetalle.setMarca(p.getMarca());
             productoDetalle.setModelo(p.getModelo());
             productoDetalle.setPrecio(p.getPrecio());
+            productoDetalle.setPrecioVigente(p.getPrecioVigente());
             productoDetalle.setDescripcion(p.getDescripcion());
+            productoDetalle.setImagen(p.getImagen());
+            productoDetalle.setEspecificaciones(p.getEspecificaciones());
             productoDetalle.setEstado(p.getEstado());
+            try {
+                productoDetalle.setStock(inventoryClient.getStock(p.getProductId()));
+            } catch (FeignException exception) {
+                productoDetalle.setStock(null);
+            }
 
             try {
                 // Saco la información desde category client
@@ -69,7 +82,18 @@ public class ProductServiceImpl implements ProductService{
             throw new ProductException("Producto con SKU proporcionado ya existe.");
         }
 
+        checkCategory(product.getCategoryId());
         return this.productRepository.save(product);
+    }
+
+    private void checkCategory(Long id) {
+        if (id == null) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Categoria obligatoria");
+        try {
+            var category = categoryClient.getCategoryById(id);
+            if (category == null) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Categoria inexistente");
+            if (!"ACTIVO".equalsIgnoreCase(category.getEstado())) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "La categoria esta desactivada");
+        }
+        catch (FeignException.NotFound e) { throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Categoria inexistente"); }
     }
 
     @Transactional
@@ -77,7 +101,8 @@ public class ProductServiceImpl implements ProductService{
     public void deleteById(Long id) {
         Product product = this.findById(id);
 
-        this.productRepository.deleteById(id);
+        product.setEstado("INACTIVO");
+        this.productRepository.save(product);
     }
 
     @Transactional
@@ -88,13 +113,11 @@ public class ProductServiceImpl implements ProductService{
             element.setEstado(product.getEstado());
             element.setPrecio(product.getPrecio());
             element.setDescripcion(product.getDescripcion());
+            element.setImagen(product.getImagen());
+            element.setEspecificaciones(product.getEspecificaciones());
 
-            try {
-                this.categoryClient.getCategoryById(product.getCategoryId());
-                element.setCategoryId(product.getCategoryId());
-            } catch (FeignException exception) {
-                throw new ProductException("La categoría con Id " + product.getProductId() + " no existe.");
-            }
+            checkCategory(product.getCategoryId());
+            element.setCategoryId(product.getCategoryId());
 
             return this.productRepository.save(element);
         }).orElseThrow(

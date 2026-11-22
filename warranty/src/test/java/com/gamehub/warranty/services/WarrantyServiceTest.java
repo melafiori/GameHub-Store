@@ -134,4 +134,13 @@ public class WarrantyServiceTest {
                 .hasMessage("No se puede cerrar una garantía sin resolución");
         verify(warrantyRepository, never()).save(any(Warranty.class));
     }
+    @Test
+    void updateCannotCloseWithoutResolution() {
+        when(warrantyRepository.findById(1L)).thenReturn(Optional.of(warrantyPrueba));
+        for (String state : java.util.List.of("CERRADA", "APROBADA", "RECHAZADA")) {
+            Warranty update = new Warranty(); update.setEstado(state); update.setResolution("  ");
+            assertThatThrownBy(() -> warrantyService.updateById(1L, update)).isInstanceOf(WarrantyException.class);
+        }
+        verify(warrantyRepository, never()).save(any());
+    }
 }

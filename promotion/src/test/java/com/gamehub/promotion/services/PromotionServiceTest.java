@@ -74,6 +74,7 @@ public class PromotionServiceTest {
         Long id = 1L;
 
         when(promotionRepository.findById(id)).thenReturn(Optional.of(promotionPrueba));
+        lenient().when(promotionRepository.lockByCode(promotionPrueba.getCode())).thenReturn(Optional.of(promotionPrueba));
         Promotion result = promotionService.findById(id);
         assertThat(result).isNotNull();
         assertThat(result.getCode()).isEqualTo("DESC10");
@@ -128,13 +129,13 @@ public class PromotionServiceTest {
         cambios.setFechaInicio(LocalDateTime.now());
         cambios.setFechaFin(LocalDateTime.now().plusDays(60));
 
-        when(promotionRepository.findById(id)).thenReturn(Optional.of(promotionPrueba));
+        when(promotionRepository.lockById(id)).thenReturn(Optional.of(promotionPrueba));
 
         when(promotionRepository.save(any(Promotion.class))).thenAnswer(invocation -> invocation.getArgument(0));
         Promotion result = promotionService.updateById(id, cambios);
         assertThat(result.getTipo()).isEqualTo("MONTO");
         assertThat(result.getEstado()).isEqualTo("INACTIVA");
-        verify(promotionRepository, times(1)).findById(id);
+        verify(promotionRepository, times(1)).lockById(id);
         verify(promotionRepository, times(1)).save(any(Promotion.class));
     }
 
@@ -143,8 +144,8 @@ public class PromotionServiceTest {
     public void shouldNotUpdatePromotionWhenNotExists() {
         Long id = 999L;
 
-        when(promotionRepository.findById(id)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> promotionService.updateById(id, promotionPrueba)).isInstanceOf(PromotionException.class).hasMessage("Promoción no encontrada");
+        when(promotionRepository.lockById(id)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> promotionService.updateById(id, promotionPrueba)).isInstanceOf(PromotionException.class).hasMessage("Promocion no encontrada");
         verify(promotionRepository, never()).save(any(Promotion.class));
     }
 
@@ -154,10 +155,10 @@ public class PromotionServiceTest {
 
         Long id = 1L;
 
-        when(promotionRepository.findById(id)).thenReturn(Optional.of(promotionPrueba));
+        when(promotionRepository.lockById(id)).thenReturn(Optional.of(promotionPrueba));
         when(promotionRepository.save(any(Promotion.class))).thenAnswer(invocation -> invocation.getArgument(0));
         promotionService.deleteById(id);
-        verify(promotionRepository, times(1)).findById(id);
+        verify(promotionRepository, times(1)).lockById(id);
         verify(promotionRepository, times(1)).save(any(Promotion.class));
     }
 

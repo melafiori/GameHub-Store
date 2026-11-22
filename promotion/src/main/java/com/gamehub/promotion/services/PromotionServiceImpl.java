@@ -18,6 +18,7 @@ public class PromotionServiceImpl implements PromotionService{
     @Transactional
     @Override
     public Promotion save(Promotion promotion) {
+        promotion.setCode(promotion.getCode().trim().toUpperCase(java.util.Locale.ROOT));
         if(promotionRepository.findByCode(promotion.getCode()).isPresent()) {
             throw new PromotionException("El código ya existe");
         }
@@ -32,13 +33,16 @@ public class PromotionServiceImpl implements PromotionService{
     @Override
     public Promotion updateById(Long id, Promotion promotion) {
 
-        Promotion currentPromotion = this.findById(id);
+        Promotion currentPromotion = promotionRepository.lockById(id).orElseThrow(() -> new PromotionException("Promocion no encontrada"));
+        if (promotion.getCode()!=null && !currentPromotion.getCode().equalsIgnoreCase(promotion.getCode().trim())) throw new PromotionException("El codigo no se puede cambiar");
+        if (promotion.getUsosMaximos()!=null && currentPromotion.getUsosActuales()!=null && promotion.getUsosMaximos()<currentPromotion.getUsosActuales()) throw new PromotionException("El limite no puede ser inferior a los usos realizados");
 
         currentPromotion.setTipo(promotion.getTipo());
         currentPromotion.setValor(promotion.getValor());
         currentPromotion.setFechaInicio(promotion.getFechaInicio());
         currentPromotion.setFechaFin(promotion.getFechaFin());
         currentPromotion.setMontoMinimo(promotion.getMontoMinimo());
+        currentPromotion.setMaximoDescuento(promotion.getMaximoDescuento());
         currentPromotion.setUsosMaximos(promotion.getUsosMaximos());
         currentPromotion.setEstado(promotion.getEstado());
 
@@ -49,7 +53,7 @@ public class PromotionServiceImpl implements PromotionService{
     @Override
     public void deleteById(Long id) {
 
-        Promotion promotion = this.findById(id);
+        Promotion promotion = promotionRepository.lockById(id).orElseThrow(() -> new PromotionException("Promocion no encontrada"));
 
         promotion.setEstado("INACTIVA");
 

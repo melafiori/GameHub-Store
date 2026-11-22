@@ -3,6 +3,7 @@ package com.gamehub.user.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,8 @@ import java.util.List;
 @AllArgsConstructor
 
 public class User{
+    @Column(name = "registration_id", unique = true, updatable = false)
+    private String registrationId;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -46,6 +49,7 @@ public class User{
     private String estado;
 
     @Transient
+    @Valid
     private List<Direccion> direcciones;
 
     @Embedded

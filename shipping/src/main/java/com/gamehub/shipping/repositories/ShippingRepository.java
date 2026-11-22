@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface ShippingRepository extends JpaRepository<Shipping, Long> {
+    Optional<Shipping> findFirstByOrderId(Long orderId);
     List<Shipping> findByOrderId(Long orderId);
     List<Shipping> findByEstado(String estado);
     Optional<Shipping> findByTracking(String tracking);

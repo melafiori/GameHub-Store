@@ -1,4 +1,6 @@
 # GameHub-Store
+
+Para instalar la versión de demostración desde los ZIP, consulta [ENTREGA_EP3.md](ENTREGA_EP3.md).
 Integrantes: Cassie Muñoz, David Pérez y  Carolina Rivera.
 ## Descripción del Proyecto
 
@@ -128,3 +130,15 @@ https://github.com/melafiori/GameHub-Store.git
  - Warranty Service
 5. Verificar el registro de servicios en: http://localhost:8013
 6. Consumir los endpoints mediante Postman o Swagger.
+## Garantias: decision de plazo de prueba
+
+La demo usa WARRANTY_PERIOD_DAYS=180 dias calendario desde la fecha de entrega confirmada por Shipping, inclusive hasta el dia 180. Es una decision configurable del proyecto. Si el despacho no tiene fecha de entrega confirmada, la solicitud se rechaza; las entregas antiguas sin fecha no se completan automaticamente. Order y Shipping verifican el JWT del cliente al consultar la compra y el despacho.
+
+
+## EP3: arranque e integracion
+
+Consulte [Arranque local EP3](docs/ARRANQUE_EP3.md) y [Documento de integracion](docs/INTEGRACION_EP3.md). Son borradores sujetos a verificacion completa.
+
+## EP3: arranque e integraci?n
+
+Consulte [arranque local](docs/ARRANQUE_EP3.md) y [documento de integraci?n](docs/INTEGRACION_EP3.md). La validaci?n integral desde cero sigue pendiente.

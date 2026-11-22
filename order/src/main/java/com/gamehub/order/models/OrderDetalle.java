@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "order_detalle")
+@Table(name = "order_detalle", uniqueConstraints = @UniqueConstraint(columnNames = {"customer_id", "idempotency_key"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,6 +23,21 @@ public class OrderDetalle {
     @Column(name = "order_id")
     private Long orderId;
 
+    @Column(name = "shipping_started")
+    private Boolean shippingStarted;
+
+    @Column(name = "customer_id")
+    private Long customerId;
+
+    @Column(name = "idempotency_key", length = 128)
+    private String idempotencyKey;
+
+    @Column(name = "cart_fingerprint", length = 64)
+    private String cartFingerprint;
+
+    @Embedded
+    private ShippingAddress direccionDespacho;
+
     @Column(name = "user_email", nullable = false)
     private String userEmail; // Quién compra (Validado contra puerto 8004/8005)
 
@@ -31,6 +46,10 @@ public class OrderDetalle {
 
     @Column(nullable = false)
     private Double total;
+    private Double subtotal;
+    private Double descuento;
+    private String codigoCupon;
+    private String motivoRechazo;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // Ojalá saber que hace esto
     @JoinColumn(name = "order_id") // Crea la llave foránea en la tabla order_items

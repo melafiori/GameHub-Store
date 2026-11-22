@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "shippings")
+@Table(name = "shippings", uniqueConstraints = @UniqueConstraint(columnNames = "order_id"))
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,7 +31,7 @@ public class Shipping  {
     @Column(name = "transportista",nullable = false)
     private String transportista;
 
-    @Column(name = "tracking",unique = true)
+    @Column(name = "tracking",unique = true, nullable = false)
     private String tracking;
 
     @Column(name = "estado",nullable = false)
@@ -39,6 +39,9 @@ public class Shipping  {
 
     @Column(name = "fecha_envio",nullable = false)
     private LocalDateTime fechaEnvio;
+
+    @Column(name = "fecha_entrega")
+    private LocalDateTime fechaEntrega;
 
     @Embedded
     private Audit audit = new Audit();

@@ -50,10 +50,13 @@ public class PromotionController {
             @ApiResponse(responseCode = "201", description = "Promoción registrada correctamente."),
             @ApiResponse(responseCode = "400", description = "Datos inválidos.")
     })
-    public Promotion save(
+    public org.springframework.http.ResponseEntity<?> save(
             @Parameter(description = "Datos de la promoción a registrar.")
             @Valid @RequestBody Promotion promotion) {
-        return promotionService.save(promotion);
+        var fields = com.gamehub.promotion.services.PromotionValidation.errors(promotion);
+        if (!fields.isEmpty()) return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("fields", fields));
+        try { return org.springframework.http.ResponseEntity.status(201).body(promotionService.save(promotion)); }
+        catch (com.gamehub.promotion.exceptions.PromotionException e) { return org.springframework.http.ResponseEntity.status(409).body(java.util.Map.of("fields", java.util.Map.of("code", e.getMessage()))); }
     }
 
     @PutMapping("/{id}")
@@ -62,13 +65,16 @@ public class PromotionController {
             @ApiResponse(responseCode = "200", description = "Promoción actualizada correctamente."),
             @ApiResponse(responseCode = "404", description = "Promoción no encontrada.")
     })
-    public Promotion updateById(
+    public org.springframework.http.ResponseEntity<?> updateById(
             @Parameter(description = "ID de la promoción.")
             @PathVariable Long id,
 
             @Parameter(description = "Nuevos datos de la promoción.")
             @RequestBody Promotion promotion) {
-        return promotionService.updateById(id, promotion);
+        var fields = com.gamehub.promotion.services.PromotionValidation.errors(promotion);
+        if (!fields.isEmpty()) return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("fields", fields));
+        try { return org.springframework.http.ResponseEntity.ok(promotionService.updateById(id, promotion)); }
+        catch (com.gamehub.promotion.exceptions.PromotionException e) { return org.springframework.http.ResponseEntity.status(409).body(java.util.Map.of("error", e.getMessage())); }
     }
 
     @DeleteMapping("/{id}")
