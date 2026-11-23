@@ -9,19 +9,15 @@ Requisitos: Java 21 o superior, Node.js 22 o superior, npm, conexión a Internet
 Abre PowerShell, cambia la ruta a tu carpeta y ejecuta:
 
 ```powershell
-Set-Location 'C:\GameHubEP3\backend'
-$env:JAVA_HOME = 'C:\ruta\a\jdk-21'
-$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+Set-Location '[RUTA AL BACKEND]'
+$env:JAVA_HOME = (Get-ChildItem "$env:ProgramFiles\Java\*", "$env:ProgramFiles\Eclipse Adoptium\*", "$env:USERPROFILE\.jdks\*" -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '2[1-9]' -and (Test-Path "$($_.FullName)\bin\java.exe") } | Select-Object -First 1).FullName
 $env:JWT_SECRET = 'ejemplo-jwt-012345678901234567890123456789'
 $env:INVENTORY_SERVICE_SECRET = 'ejemplo-inventario-012345678901234567890'
 $env:REGISTRATION_SERVICE_SECRET = 'ejemplo-registro-012345678901234567890123'
 $env:PROMOTION_SERVICE_SECRET = 'ejemplo-promocion-01234567890123456789012'
 $env:PAYMENT_SERVICE_SECRET = 'ejemplo-pago-01234567890123456789012345'
 $env:SHIPPING_SERVICE_SECRET = 'ejemplo-despacho-01234567890123456789012'
-$env:WARRANTY_PERIOD_DAYS = '180'
-.\mvnw.cmd -v
-.\mvnw.cmd -pl eureka,gateway,auth,user,category,inventory,product,promotion,payment,order,shipping,warranty,review '-DskipTests' package
-if ($LASTEXITCODE -ne 0) { throw 'Falló la compilación' }
+if (-not (Test-Path '.\gateway\target\gateway-0.0.1-SNAPSHOT.jar')) { .\mvnw.cmd '-DskipTests' package }
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\iniciar-local.ps1
 ```
 
@@ -30,7 +26,7 @@ El script inicia Eureka y luego los servicios. Solo compila de nuevo cuando camb
 ## Terminal 2: frontend
 
 ```powershell
-Set-Location 'C:\GameHubEP3\frontend'
+Set-Location '[RUTA AL FRONTEND]'
 npm.cmd ci
 $env:VITE_API_URL = 'http://localhost:19646'
 npm.cmd run dev -- --host 127.0.0.1 --port 5173
